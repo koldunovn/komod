@@ -1,6 +1,6 @@
 komod
 =====
 
-Pyhton module that helps to postprocess and plot results from ocean model.
+Pyhton module that helps to postprocess and plot results from the ocean model (MITgcm).
 
 This module is not intended for active public use, so the code probably will be dirty and comments rare :) 
