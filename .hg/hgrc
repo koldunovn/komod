@@ -1,4 +1,0 @@
-[paths]
-default = ssh://hg@bitbucket.org/koldunovn/komod/
-[ui] 
-username = Kolya
