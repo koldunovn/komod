@@ -3,14 +3,17 @@
 
 
 """Komod plot module 
-coord2d 	- Convert 1d coordinates to 2d coordinates
-colormap 	- Define custom colormaps
-arctpl 		- plot contours of 2D, 3D or 4D field in the Arctic region from ndarray
-arctpltnc 	- plot contours of 2D, 3D or 4D field in the Arctic region from netCDF file
-globpltnc 	- plot contours of 2D, 3D or 4D field on the global map from netCDF file. You can also specify custom region.
-pltgrd		- plot model grid from lat and lon arrays
-pltgrdnc	- plot model grid from netCDF file
-
+coord2d 		- Convert 1d coordinates to 2d coordinates
+colormap 		- Define custom colormaps
+arctpl 			- plot contours of 2D, 3D or 4D field in the Arctic region from ndarray
+arctpltnc 		- plot contours of 2D, 3D or 4D field in the Arctic region from netCDF file
+globpltnc 		- plot contours of 2D, 3D or 4D field on the global map from netCDF file. You can also specify custom region.
+pltgrd			- plot model grid from lat and lon arrays
+pltgrdnc		- plot model grid from netCDF file
+plt_vectors     	- plot vector data from 2D fields
+plt_vectors_scalars 	- plot vectors and scalar filed (e.g. wind direction and speed)
+plt_vectors_colors      - plot colored vectors
+ 
 Nikolay Koldunov 23 February 2010
 """
 
