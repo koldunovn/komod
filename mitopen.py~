@@ -1,0 +1,555 @@
+#!/bin/python
+# -*- coding: utf-8 -*-
+
+"""Komod open module
+Opens different filetypes
+
+mitbincoord	 -open MITgcm binary XC.data and YC.data files
+mitbin		 -open MITgcm binary data file
+phcascii	- open PHC (http://psc.apl.washington.edu/Climatology.html) ascii file that have no delimiter
+
+Nikolay Koldunov 16 February 2010
+"""
+
+# -------------------------------------------------
+
+import numpy
+import os
+import Nio
+import glob
+
+def mitbincoord(xdim, ydim, xcdata='./', ycdata='./', bswap=1):
+	"""open MITgcm binary XC.data and YC.data files
+
+    Usage: mitbincoord(xdim, ydim, [xcdata], [ycdata],  [endianness])
+
+    Input:
+	xdim        = x dimension
+	ydim        = y dimension
+        xcdata      = path to XC.data file [default ./]
+        ycdata      = path to YC.data file [default ./]
+	bswap       = do we need a byte swap? Yes (1) or no (0) [default 1]
+        
+
+    Output:
+        arrays of longitude (lon) and latitude (lat) 
+
+    """
+        fd_xc = open(xcdata+'XC.data', 'rb')
+	fd_yc = open(ycdata+'YC.data', 'rb') 
+	size = xdim*ydim
+	shape = (xdim,ydim)
+	datatype = 'float32'
+		
+	lon = numpy.fromfile(file=fd_xc, dtype = datatype, count=size)
+	lon = lon.reshape(shape)
+	if bswap==1:
+		lon = lon.byteswap()
+		
+	lat = numpy.fromfile(file=fd_yc, dtype = datatype, count=size)
+	lat = lat.reshape(shape)
+	if bswap==1:
+		lat = lat.byteswap()
+	
+	return lon, lat
+
+def rmeta(filename):
+	''' reads .meta file and return information about .data file
+	'''
+	
+	ifile = open(filename, 'r')
+	lines = ifile.readlines()  
+	ifile.close()
+
+	ndim = int(lines[0].split()[3])
+	ydim = int(lines[2].split()[0][:-1])
+	xdim = int(lines[3].split()[0][:-1])
+
+	if ndim == 2:
+		increm = 0
+		zdim = 1
+	elif ndim == 3:
+		zdim = int(lines[4].split()[0][:-1])
+		increm = 1
+	else:
+		print("unsupported number of dimensions")
+	
+	datatype	 = lines[5+increm].split()[3][1:-1]
+	nrecords 	 = int(lines[6+increm].split()[3])
+	
+	if any("timeStepNumber" in s for s in lines):
+		timeStepNumber   = int(lines[7+increm].split()[3])
+	else:
+		timeStepNumber = 1	
+	
+	return ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber
+	
+def mitbin(filename, xdim, ydim, zdim=1, tdim=1, bswap=1, datatype = 'float64'):
+	"""open MITgcm binary file that represents one time step
+
+    Usage: mitbin(filename, xdim, ydim, [zdim], [tdim], [bswap])
+
+    Input:
+	filename    = path to the file
+	xdim        = x dimension
+	ydim        = y dimension
+	zdim        = z dimension [default 1]
+	tdim        - time dimension [default 1]
+	bswap       = do we need a byte swap? Yes (1) or no (0) [default 1]
+	datatype    = data type, e.g., 'float32'. By default - float64
+        
+    Output:
+       tdim*zdim*xdim*ydim array of data
+
+    """
+    	fd_data = open(filename, 'rb')
+	
+	size = tdim*zdim*xdim*ydim
+	shape = (tdim,zdim,xdim,ydim)
+
+        
+	data = numpy.fromfile(file=fd_data, dtype = datatype, count=size)
+	
+        data = data.reshape(shape)
+	if bswap==1:
+		data = data.byteswap()
+		
+	fd_data.close()
+	
+	return data
+
+def mitbin2(filename, bswap=1, meta=None):
+	'''Use rmeta to get inforamtion about the file and return field extracted from it.
+	
+	meta = None - flag to fix problem with wrong adxx*.meta files. 
+	              If meta = 'xx', use .meta file from xx files 
+	'''
+	
+	fd_data = open(filename, 'rb')
+	if meta == None:
+		ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber = rmeta(filename[:-4]+"meta")
+	elif meta == 'xx':
+		ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber = rmeta(filename[2:-4]+"meta")
+	
+	size = nrecords*zdim*xdim*ydim
+	shape = (nrecords,zdim,xdim,ydim)
+	
+	data = numpy.fromfile(file=fd_data, dtype = datatype, count=size)
+	data = data.reshape(shape)
+	if bswap==1:
+		data = data.byteswap()
+	
+	fd_data.close()
+	
+	return data
+		
+	
+		
+			
+
+def phcascii(filename, xdim, ydim,  nlines, nwords=10, lword=8,  zdim=1):
+	"""open PHC (http://psc.apl.washington.edu/Climatology.html) ascii file that have no delimiter
+
+    Usage: phcascii(filename, xdim, ydim, lword, nlines, [zdim])
+
+    Input:
+	filename    = path to the file
+	xdim        = x dimension
+	ydim        = y dimension
+	nlines      = number of lines in input file
+	nwords      = number of "words", chnks of the data that represent one number (df=10)
+	lword       = length of every "word" (df=8)
+	zdim        = z dimension [default 1]
+	
+        
+    Output:
+       zdim*xdim*ydim array of data
+
+    """
+    	in_file = open(filename,'r')
+    
+    	dd = numpy.zeros((nlines,nwords))
+    
+    	for i in range(nlines):
+	
+		for nn in range(nwords):
+			dd[i,nn] = float(in_file.read(lword))
+		
+		in_file.read(1) # this one is needed to read "/n" at the end of each line
+
+    	in_file.close()
+    
+    	data = dd.reshape(zdim,xdim,ydim)
+	
+	return data
+
+
+def nc2d(parameters=['adxx_atemp'], ofile='adxx', iteration='0', bswap=1, sstart_date = "seconds since 2002-10-01 07:00", deltaT=1200, xx_period=240000.0, FillValue=-1.0e+23, meta=None, dump='no'):
+	'''
+	Convert 2d fields to netCDF format with use of Nio module. 
+	Names of the files should be defined in form of the list, even if we have only one variable.
+		
+	I assume that if file contain more than one record it is xx or adxx file.
+	I put everything on the C grid!
+	
+	iteration - should be STRING!	
+	meta = None - flag to fix problem with wrong adxx*.meta files. 
+	              If meta = 'xx', use .meta file from xx files 
+	'''
+	lon = mitbin2('XC.data',bswap)[0,0,:,:]
+	lat = mitbin2('YC.data',bswap)[0,0,:,:]
+	lsmask = mitbin2('maskCtrlC.data',bswap)[:,0,:,:]
+
+	
+	if os.path.exists(ofile+".nc") == True:
+		os.system("rm "+ofile+".nc")
+	
+	if meta == None:
+		ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber = rmeta(parameters[0]+"."+iteration.zfill(10)+".meta")
+	elif meta == 'xx':
+		ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber = rmeta(parameters[0][2:]+"."+iteration.zfill(10)+".meta")
+	if nrecords == 1:
+		ttime = numpy.zeros((nrecords))
+		ttime[0] = timeStepNumber*deltaT
+	elif nrecords > 1:
+		ttime = numpy.zeros((nrecords))
+		for i in range (nrecords):
+	    		ttime[i] = xx_period*i
+    
+	opt = Nio.options()
+	opt.PreFill = False
+	opt.HeaderReserveSpace = 4000
+	f = Nio.open_file(ofile+".nc","w",opt)
+
+	f.title = "MITgcm variables in netCDF format"
+	f.create_dimension('x',xdim)
+	f.create_dimension('y',ydim)
+	f.create_dimension('time',ttime.shape[0])
+
+	f.create_variable('time','d',('time',))
+	f.variables['time'].units        = sstart_date 
+	f.variables['time'][:] = ttime
+
+
+	f.create_variable('latitude','d',('x','y'))
+	f.variables['latitude'].long_name        = "latitude"
+	f.variables['latitude'].units            = "degrees_north"
+	f.variables['latitude'].standard_name    = "grid_latitude"
+	f.variables['latitude'][:] = lat[:]
+
+	f.create_variable('longitude','d',('x','y'))
+	f.variables['longitude'].long_name        = "longitude"
+	f.variables['longitude'].units            = "degrees_east"
+	f.variables['longitude'].standard_name    = "grid_longitude"
+	f.variables['longitude'][:] = lon[:]
+
+	#vvariables = ["atemp","aqh", "uwind", "vwind", ]
+	#vvariables = ["atemp"]
+
+	for parameter in parameters:
+		adatemp = mitbin2(parameter+"."+iteration.zfill(10)+".data", bswap=bswap, meta=meta)[:,0,:,:]
+
+	#	adatemp = numpy.where(adatemp[:] > 1.0e+12, 0, adatemp[:])
+		adatemp = numpy.where(adatemp[:] < -1.0e+20, FillValue, adatemp[:])
+		adatemp = numpy.where(lsmask[:]==0, FillValue, adatemp[:])
+		
+       		f.create_variable(parameter,'d',('time','x','y'))
+
+        	f.variables[parameter].long_name    = parameter
+        	f.variables[parameter].units        = "xz"
+        	f.variables[parameter]._FillValue   = FillValue
+		f.variables[parameter].missing_value = FillValue
+		#print(adatemp.shape())
+		
+	        f.variables[parameter][:] = adatemp
+		
+	f.close()
+	if dump == 'yes':
+		return adatemp
+	
+	
+
+def var_nc2d(parameters=['AREA','HEFF'], ofile='MIT_output_2d', bswap=1, sstart_date = "seconds since 2002-10-01 07:00", deltaT=1800, FillValue=-1.0e+23, dump='no'):
+	'''
+	Convert 2d fields to netCDF format with use of Nio module. 
+	Names of the files should be defined in form of the list, even if we have only one variable.
+		
+	I assume that if file contain more than one record it is xx or adxx file.
+	I put everything on the C grid!
+	
+	iteration - should be STRING!	
+	meta = None - flag to fix problem with wrong adxx*.meta files. 
+	              If meta = 'xx', use .meta file from xx files 
+	'''
+	lon = mitbin2('XC.data',bswap)[0,0,:,:]
+	lat = mitbin2('YC.data',bswap)[0,0,:,:]
+	lsmask = mitbin2('maskCtrlC.data',bswap)[:,0,:,:]
+	fileList = glob.glob(parameters[0]+"*.data")
+	
+	if os.path.exists(ofile+".nc") == True:
+		os.system("rm "+ofile+".nc")
+	
+	ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber = rmeta(fileList[0][:-4]+"meta")
+	
+	
+	ttime = numpy.zeros((len(fileList)))
+	#ttime[0] = timeStepNumber*deltaT
+	
+	opt = Nio.options()
+	opt.PreFill = False
+	opt.HeaderReserveSpace = 4000
+	f = Nio.open_file(ofile+".nc","w",opt)
+
+	f.title = "MITgcm variables in netCDF format"
+	f.create_dimension('x',xdim)
+	f.create_dimension('y',ydim)
+	f.create_dimension('time',ttime.shape[0])
+
+	f.create_variable('time','d',('time',))
+	f.variables['time'].units        = sstart_date 
+	
+
+
+	f.create_variable('latitude','d',('x','y'))
+	f.variables['latitude'].long_name        = "latitude"
+	f.variables['latitude'].units            = "degrees_north"
+	f.variables['latitude'].standard_name    = "grid_latitude"
+	f.variables['latitude'][:] = lat[:]
+
+	f.create_variable('longitude','d',('x','y'))
+	f.variables['longitude'].long_name        = "longitude"
+	f.variables['longitude'].units            = "degrees_east"
+	f.variables['longitude'].standard_name    = "grid_longitude"
+	f.variables['longitude'][:] = lon[:]
+
+	#vvariables = ["atemp","aqh", "uwind", "vwind", ]
+	#vvariables = ["atemp"]
+	
+	for parameter in parameters:
+		
+		f.create_variable(parameter,'d',('time','x','y'))
+
+        	f.variables[parameter].long_name    = gatrib(parameter)[0]
+        	f.variables[parameter].units        = gatrib(parameter)[1]
+        	f.variables[parameter]._FillValue   = FillValue
+		f.variables[parameter].missing_value = FillValue
+		#print(adatemp.shape())
+		adatemp_final = numpy.zeros((len(fileList), xdim, ydim))
+	        
+		iterator = 0
+		for fileName in fileList:
+			
+			adatemp = mitbin2(parameter+fileName[-16:], bswap=bswap)[0,0,:,:]
+			ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber = rmeta(fileName[:-4]+"meta")
+			adatemp = numpy.where(adatemp[:] < -1.0e+20, FillValue, adatemp[:])
+			adatemp = numpy.where(lsmask[:]==0, FillValue, adatemp[:])
+			adatemp_final[iterator,:,:] = adatemp
+			ttime[iterator] = timeStepNumber*deltaT
+			iterator = iterator + 1
+			
+		f.variables[parameter][:] = adatemp_final
+ 	
+	f.variables['time'][:] = ttime
+	f.close()
+	if dump == 'yes':
+		return adatemp
+	
+def nc3d(parameters=['adxx_atemp'], ofile='adxx', iteration='0', bswap=1, sstart_date = "seconds since 2002-10-01 07:00", deltaT=1200, xx_period=240000.0, FillValue=-1.0e+23, meta=None, dump="no"):
+	'''
+	Convert 3d fields to netCDF format with use of Nio module. 
+	Names of the files should be defined in form of the list, even if we have only one variable.
+		
+	I assume that if file contain more than one record it is xx or adxx file.
+	I put everything on the C grid!
+	
+	iteration - should be STRING!	
+	meta = None - flag to fix problem with wrong adxx*.meta files. 
+	              If meta = 'xx', use .meta file from xx files 
+	'''
+	lon = mitbin2('XC.data',bswap)[0,0,:,:]
+	lat = mitbin2('YC.data',bswap)[0,0,:,:]
+	lev = mitbin2('DRC.data',bswap)[0,:,0,0]
+	lev = numpy.cumsum(lev)
+	lsmask = mitbin2('maskCtrlC.data',bswap)[:,:,:,:]
+	
+	if os.path.exists(ofile+".nc") == True:
+		os.system("rm "+ofile+".nc")
+	
+	if meta == None:
+		ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber = rmeta(parameters[0]+"."+iteration.zfill(10)+".meta")
+	elif meta == 'xx':
+		ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber = rmeta(parameters[0][2:]+"."+iteration.zfill(10)+".meta")
+	if nrecords == 1:
+		ttime = numpy.zeros((nrecords))
+		ttime[0] = timeStepNumber*deltaT
+	elif nrecords > 1:
+		ttime = numpy.zeros((nrecords))
+		for i in range (nrecords):
+	    		ttime[i] = xx_period*i
+    
+	opt = Nio.options()
+	opt.PreFill = False
+	opt.HeaderReserveSpace = 4000
+	f = Nio.open_file(ofile+".nc","w",opt)
+
+	f.title = "MITgcm variables in netCDF format"
+	f.create_dimension('x',xdim)
+	f.create_dimension('y',ydim)
+	f.create_dimension('z',zdim)
+	f.create_dimension('time',ttime.shape[0])
+
+	f.create_variable('time','d',('time',))
+	f.variables['time'].units        = sstart_date 
+	f.variables['time'][:] = ttime
+
+	f.create_variable('z','d',('z',))
+	f.variables['z'].units        = "meters" 
+	f.variables['z'][:] =  lev[:]
+
+	
+	f.create_variable('latitude','d',('x','y'))
+	f.variables['latitude'].long_name        = "latitude"
+	f.variables['latitude'].units            = "degrees_north"
+	f.variables['latitude'].standard_name    = "grid_latitude"
+	f.variables['latitude'][:] = lat[:]
+
+	f.create_variable('longitude','d',('x','y'))
+	f.variables['longitude'].long_name        = "longitude"
+	f.variables['longitude'].units            = "degrees_east"
+	f.variables['longitude'].standard_name    = "grid_longitude"
+	f.variables['longitude'][:] = lon[:]
+
+	#vvariables = ["atemp","aqh", "uwind", "vwind", ]
+	#vvariables = ["atemp"]
+
+	for parameter in parameters:
+		adatemp = mitbin2(parameter+"."+iteration.zfill(10)+".data", bswap=bswap, meta=meta)[:,:,:,:]
+
+	#	adatemp = numpy.where(adatemp[:] > 1.0e+12, 0, adatemp[:])
+		adatemp = numpy.where(adatemp[:] < -1.0e+20, FillValue, adatemp[:])
+		adatemp = numpy.where(lsmask[:]==0, FillValue, adatemp[:])
+       		f.create_variable(parameter,'d',('time','z','x','y'))
+		
+		nname, unit, grid = gatrib(parameter)
+		
+        	f.variables[parameter].long_name    = nname
+        	f.variables[parameter].units        = unit
+		f.variables[parameter].grid         = grid
+        	f.variables[parameter]._FillValue   = FillValue
+		#print(adatemp.shape())
+
+	        f.variables[parameter][:] = adatemp
+		
+	f.close()
+	if dump == 'yes':
+		return adatemp
+	
+def gatrib(parname):
+	'''get attrubutes for variables'''
+	
+	if (parname == 'T') or (parname == 'Ttave'):
+		name = 'Potential Temperature'
+		unit = 'deg. C'
+		grid = 'TS'
+      
+	elif (parname == 'S') or (parname == 'Stave'):
+		name = 'Salinity'
+		unit = 'PSU'
+		grid = 'TS'
+       
+        elif (parname == 'U') or (parname == 'Utave'):
+		name = 'Zonal Velocity'
+		unit = 'm/s'
+		grid = 'U'
+       
+        elif (parname == 'V') or (parname == 'Vtave'):
+		name = 'Meridional Velocity'
+		unit = 'm/s'
+		grid = 'V'
+       
+	elif (parname == 'W') or (parname == 'Wtave'):
+		name = 'Vertical Velocity'
+		unit = 'm/s'
+		grid = 'W'
+        elif (parname == '"ETA') or (parname == 'ETAtave'):
+		name = 'Sea Surface Height'
+		unit = 'm'
+		grid = 'TS'
+      
+        elif (parname == 'PHL') or (parname == 'PHLtave'):
+		name = 'Bottom Dyn. Height Anom.'
+		unit = 'm2/s2'
+		grid = 'TS'
+      
+        elif (parname == 'UICE') or (parname == 'UICEtave'):
+		name = 'Zonal Ice Velocity'
+		unit = 'm/s'
+		grid = 'U'
+      
+        elif (parname == 'VICE') or (parname == 'VICEtave'):
+		name = 'Meridional Ice Velocity'
+		unit = 'm/s'
+		grid = 'V'
+      
+        elif (parname == 'HEFF') or (parname == 'HEFFtave'):
+		name = 'Eff. Ice Thickness'
+		unit = 'm'
+		grid = 'TS'
+     
+	elif (parname == 'HSNOW') or (parname == 'HSNOW'):
+		name = 'Eff. Snow Thickness'
+		unit = 'm'
+		grid = 'TS'
+
+	elif (parname == 'AREA') or (parname == 'AREAtave'):
+		name = 'Ice Concentration'
+		unit = ' '
+		grid = 'TS'
+
+	elif (parname == 'HSALT') or (parname == 'HSALTtave'):
+		name = 'Eff. Ice Salinity'
+		unit = 'g/m2'
+		grid = 'TS'
+
+	elif (parname == 'QNET') or (parname == 'QNETtave'):
+		name = 'Net Heat Flux'
+		unit = 'W/m2'
+		grid = 'TS'
+
+	elif (parname == 'QSW') or (parname == 'QSWtave'):
+		name = 'Net Shortwave Heat Flux'
+		unit = 'W/m2'
+		grid = 'TS'
+
+	elif (parname == 'EmPmR') or (parname == 'EmPmRtave'):
+		name = 'Net Freshwater Flux'
+		unit = 'm/s'
+		grid = 'TS'
+
+	elif (parname == 'FU') or (parname == 'FUtave'):
+		name = 'Zonal Wind Stress'
+		unit = 'N/m2'
+		grid = 'U'
+
+	elif (parname == 'FV') or (parname == 'FVtave'):
+		name = 'Meridional Wind Stress'
+		unit = 'N/m2'
+		grid = 'V'
+
+	elif (parname == 'UWIND') or (parname == 'UWINDtave'):
+		name = 'Zonal Wind'
+		unit = 'm/s'
+		grid = 'U'
+
+	elif (parname == 'VWIND') or (parname == 'VWINDtave'):
+		name = 'Meridional Wind'
+		unit = 'm/s'
+		grid = 'V'
+
+	else:
+		name = parname
+		unit = 'some'
+		grid = 'have no idea'
+
+	return name, unit, grid
+
