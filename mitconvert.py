@@ -4,7 +4,7 @@
 """Komod open module
 Converts different files to netcdf
 
-Nikolay Koldunov 10 July 2010
+Nikolay Koldunov 10 July 2012
 """
 
 import numpy
