@@ -1573,7 +1573,7 @@ def plt_vectors_scalars(lon, lat, u_wind, v_wind, scalar_data, datamin = -2., da
 	if vfMissingUValueV != None:
 		vcres.vfMissingUValueV = vfMissingUValueV
 	if tiMainString != None:
-		cnres.tiMainString =
+		cnres.tiMainString = tiMainString
 	
 	vcres.vfXArray     = lon_reshape
 	vcres.vfYArray     = lat_reshape

@@ -1540,7 +1540,7 @@ def plt_vectors(lon, lat, u_wind, v_wind, MinFracLengthF = 0.005, RefMagnitudeF 
 	if showfig==True:
 		os.system("gv "+psname+".ps")
 
-def plt_vectors_scalars(lon, lat, u_wind, v_wind, scalar_data, datamin = -2., datamax = 2., datastep = 0.2, vfMissingUValueV = None, sfMissingValueV = None, MinFracLengthF = 0.005, RefMagnitudeF = 0.3, RefLengthF = 0.05, LineArrowHeadMaxSizeF= 0.005, LineArrowHeadMinSizeF=0.005, RefAnnoString1 = 'vector', psname="output", sstep=1, region = 'Global', showfig=False, TitleString = 'variable', minLon=0, maxLon=360 , minLat=-80 , maxLat=85, colormap_name='posneg_1', vcLineArrowThicknessF=1):
+def plt_vectors_scalars(lon, lat, u_wind, v_wind, scalar_data, datamin = -2., datamax = 2., datastep = 0.2, vfMissingUValueV = None, sfMissingValueV = None, MinFracLengthF = 0.005, RefMagnitudeF = 0.3, RefLengthF = 0.05, LineArrowHeadMaxSizeF= 0.005, LineArrowHeadMinSizeF=0.005, RefAnnoString1 = 'vector', psname="output", sstep=1, region = 'Global', showfig=False, TitleString = 'variable', tiMainString = None , minLon=0, maxLon=360 , minLat=-80 , maxLat=85, colormap_name='posneg_1', vcLineArrowThicknessF=1):
 	'''Plot vectors and scalar value over map
   Usage:
 	plt_vectors(lon, lat, u_wind, v_wind, MinFracLengthF = 0.005, RefMagnitudeF = 0.3, RefLengthF = 0.05, LineArrowHeadMaxSizeF= 0.005, LineArrowHeadMinSizeF=0.005, RefAnnoString1 = 'vector', psname="output", sstep=1, region = 'Global', minLon=0, maxLon=360 , minLat=-80 , maxLat=85)'''
@@ -1572,6 +1572,8 @@ def plt_vectors_scalars(lon, lat, u_wind, v_wind, scalar_data, datamin = -2., da
 	vcres.vfVDataArray = yyy_reshape
 	if vfMissingUValueV != None:
 		vcres.vfMissingUValueV = vfMissingUValueV
+	if tiMainString != None:
+		cnres.tiMainString =
 	
 	vcres.vfXArray     = lon_reshape
 	vcres.vfYArray     = lat_reshape
