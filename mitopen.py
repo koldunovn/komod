@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 
 """Komod open module
-Opens different filetypes
+Opens different filetypes, mainly those produced by MITgcm.
 
 mitbincoord	 -open MITgcm binary XC.data and YC.data files
+rmeta		 -reads .meta file and return information about .data file
 mitbin		 -open MITgcm binary data file
 phcascii	- open PHC (http://psc.apl.washington.edu/Climatology.html) ascii file that have no delimiter
 
-Nikolay Koldunov 16 February 2010
+Copyright (C) 2010 - 2013 Nikolay Koldunov <koldunovn@gmail.com> 
 """
 
 # -------------------------------------------------
@@ -16,10 +17,10 @@ Nikolay Koldunov 16 February 2010
 import numpy
 import os
 import Nio
-#import glob
+import glob
 
 def mitbincoord(xdim, ydim, xcdata='./', ycdata='./', bswap=1):
-	"""open MITgcm binary XC.data and YC.data files
+	"""Opens MITgcm binary XC.data and YC.data files
 
     Usage: mitbincoord(xdim, ydim, [xcdata], [ycdata],  [endianness])
 
@@ -54,7 +55,21 @@ def mitbincoord(xdim, ydim, xcdata='./', ycdata='./', bswap=1):
 	return lon, lat
 
 def rmeta(filename):
-	''' reads .meta file and return information about .data file
+	''' Reads .meta file and return information about .data file.
+	Usage: rmeta(filename)
+
+	Input:
+	    filename        = name of the .meta file (with .meta extention)
+	            
+	Output:
+	    ndim		- Number of dimensions.
+	    xdim		- Xdim
+	    ydim		- Ydim
+	    zdim		- Zdim
+	    datatype		- Datatype
+	    nrecords		- Number of records.
+	    timeStepNumber	- Time step number
+
 	'''
 	
 	ifile = open(filename, 'r')
@@ -85,7 +100,7 @@ def rmeta(filename):
 	return ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber
 	
 def mitbin(filename, xdim, ydim, zdim=1, tdim=1, bswap=1, datatype = 'float64'):
-	"""open MITgcm binary file that represents one time step
+	"""Opens MITgcm binary file that represents one time step.
 
     Usage: mitbin(filename, xdim, ydim, [zdim], [tdim], [bswap])
 
@@ -119,10 +134,18 @@ def mitbin(filename, xdim, ydim, zdim=1, tdim=1, bswap=1, datatype = 'float64'):
 	return data
 
 def mitbin2(filename, bswap=1, meta=None):
-	'''Use rmeta to get inforamtion about the file and return field extracted from it.
+	'''Uses rmeta to get inforamtion about the file and return field extracted from it.
 	
-	meta = None - flag to fix problem with wrong adxx*.meta files. 
-	              If meta = 'xx', use .meta file from xx files 
+	Usage: mitbin2(filename, [bswap], [meta])
+	
+	Input:
+	    filename    - path to the file.
+	    bswap       - do we need a byte swap? Yes (1) or no (0) [default 1]
+	    meta	- None - flag to fix problem with wrong adxx*.meta files. 
+			  If meta = 'xx', use .meta file from xx files 
+	
+	Output:
+	    nrecords*zdim*xdim*ydim numpy array of data.
 	'''
 	
 	fd_data = open(filename, 'rb')
@@ -186,15 +209,26 @@ def phcascii(filename, xdim, ydim,  nlines, nwords=10, lword=8,  zdim=1):
 
 def nc2d(parameters=['adxx_atemp'], ofile='adxx', iteration='0', bswap=1, sstart_date = "seconds since 2002-10-01 07:00", deltaT=1200, xx_period=240000.0, FillValue=-1.0e+23, meta=None, dump='no'):
 	'''
-	Convert 2d fields to netCDF format with use of Nio module. 
+	Convert 2d fields from adxx* and xx* fles to netCDF format with use of Nio module.
+	In order to convert variables (like T, S, AREA) use var_nc2d.  
 	Names of the files should be defined in form of the list, even if we have only one variable.
 		
 	I assume that if file contain more than one record it is xx or adxx file.
 	I put everything on the C grid!
 	
-	iteration - should be STRING!	
-	meta = None - flag to fix problem with wrong adxx*.meta files. 
-	              If meta = 'xx', use .meta file from xx files 
+	Input:
+	    parameters		- list with names of the variables.
+	    ofile 		- name of the output file.
+	    iteration		- iteration of optimisation, should be STRING!
+	    bswap       	- do we need a byte swap? Yes (1) or no (0) [default 1]
+	    sstart_date		- should be "seconds since", [default "seconds since 2002-10-01 07:00"
+	    deltaT		- time step in seconds
+	    xx_period		- xx_*period
+	    FillValue		- missing value
+	    meta		- flag to fix problem with wrong adxx*.meta files. 
+				  If meta = 'xx', use .meta file from xx files 
+	    dump 		- if dump='yes' will return numpy array with data
+	    	
 	'''
 	lon = mitbin2('XC.data',bswap)[0,0,:,:]
 	lat = mitbin2('YC.data',bswap)[0,0,:,:]
@@ -271,15 +305,19 @@ def nc2d(parameters=['adxx_atemp'], ofile='adxx', iteration='0', bswap=1, sstart
 
 def var_nc2d(parameters=['AREA','HEFF'], ofile='MIT_output_2d', bswap=1, sstart_date = "seconds since 2002-10-01 07:00", deltaT=1800, FillValue=-1.0e+23, dump='no'):
 	'''
-	Convert 2d fields to netCDF format with use of Nio module. 
+	Convert 2d fields produced by MITgcm to netCDF format with use of Nio module. 
 	Names of the files should be defined in form of the list, even if we have only one variable.
-		
-	I assume that if file contain more than one record it is xx or adxx file.
+
 	I put everything on the C grid!
 	
-	iteration - should be STRING!	
-	meta = None - flag to fix problem with wrong adxx*.meta files. 
-	              If meta = 'xx', use .meta file from xx files 
+	Input:
+	    parameters		- list with names of the variables (like AREA or AREAtave).
+	    ofile 		- name of the output file.
+	    bswap       	- do we need a byte swap? Yes (1) or no (0) [default 1]
+	    sstart_date		- should be "seconds since", [default "seconds since 2002-10-01 07:00"
+	    deltaT		- time step in seconds
+	    FillValue		- missing value
+	    dump 		- if dump='yes' will return numpy array with data
 	'''
 	lon = mitbin2('XC.data',bswap)[0,0,:,:]
 	lat = mitbin2('YC.data',bswap)[0,0,:,:]
@@ -322,9 +360,6 @@ def var_nc2d(parameters=['AREA','HEFF'], ofile='MIT_output_2d', bswap=1, sstart_
 	f.variables['longitude'].standard_name    = "grid_longitude"
 	f.variables['longitude'][:] = lon[:]
 
-	#vvariables = ["atemp","aqh", "uwind", "vwind", ]
-	#vvariables = ["atemp"]
-	
 	for parameter in parameters:
 		
 		f.create_variable(parameter,'d',('time','x','y'))
@@ -333,7 +368,7 @@ def var_nc2d(parameters=['AREA','HEFF'], ofile='MIT_output_2d', bswap=1, sstart_
         	f.variables[parameter].units        = gatrib(parameter)[1]
         	f.variables[parameter]._FillValue   = FillValue
 		f.variables[parameter].missing_value = FillValue
-		#print(adatemp.shape())
+
 		adatemp_final = numpy.zeros((len(fileList), xdim, ydim))
 	        
 		iterator = 0
@@ -356,15 +391,23 @@ def var_nc2d(parameters=['AREA','HEFF'], ofile='MIT_output_2d', bswap=1, sstart_
 	
 def nc3d(parameters=['adxx_atemp'], ofile='adxx', iteration='0', bswap=1, sstart_date = "seconds since 2002-10-01 07:00", deltaT=1200, xx_period=240000.0, FillValue=-1.0e+23, meta=None, dump="no"):
 	'''
-	Convert 3d fields to netCDF format with use of Nio module. 
+	Convert 3d from adxx* and xx* fles to netCDF format with use of Nio module.
 	Names of the files should be defined in form of the list, even if we have only one variable.
-		
-	I assume that if file contain more than one record it is xx or adxx file.
+
 	I put everything on the C grid!
 	
-	iteration - should be STRING!	
-	meta = None - flag to fix problem with wrong adxx*.meta files. 
-	              If meta = 'xx', use .meta file from xx files 
+	Input:
+	    parameters		- list with names of the variables.
+	    ofile 		- name of the output file.
+	    iteration		- iteration of optimisation, should be STRING!
+	    bswap       	- do we need a byte swap? Yes (1) or no (0) [default 1]
+	    sstart_date		- should be "seconds since", [default "seconds since 2002-10-01 07:00"
+	    deltaT		- time step in seconds
+	    xx_period		- xx_*period
+	    FillValue		- missing value
+	    meta		- flag to fix problem with wrong adxx*.meta files. 
+				  If meta = 'xx', use .meta file from xx files 
+	    dump 		- if dump='yes' will return numpy array with data
 	'''
 	lon = mitbin2('XC.data',bswap)[0,0,:,:]
 	lat = mitbin2('YC.data',bswap)[0,0,:,:]
