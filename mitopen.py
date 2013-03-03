@@ -2,12 +2,17 @@
 # -*- coding: utf-8 -*-
 
 """Komod open module
-Opens different filetypes, mainly those produced by MITgcm.
+Opens different file types, mainly those produced by MITgcm.
 
-mitbincoord	 -open MITgcm binary XC.data and YC.data files
-rmeta		 -reads .meta file and return information about .data file
-mitbin		 -open MITgcm binary data file
-phcascii	- open PHC (http://psc.apl.washington.edu/Climatology.html) ascii file that have no delimiter
+mitbincoord	 - opens MITgcm binary XC.data and YC.data files
+rmeta		 - reads .meta file and return information about .data file
+mitbin		 - opens MITgcm binary data file
+phcascii	 - opens PHC (http://psc.apl.washington.edu/Climatology.html) ascii file that have no delimiter
+nc2d		 - Convert 2d fields from adxx* and xx* fles to netCDF format with use of Nio module.
+var_nc2d	 - Convert 2d fields produced by MITgcm to netCDF format with use of Nio module. 
+nc3d		 - Convert 3d fields from adxx* and xx* fles to netCDF format with use of Nio module.
+var_nc3d	 - Convert 2d fields produced by MITgcm to netCDF format with use of Nio module. 
+gatrib 		 - Return attrubutes for known variables.
 
 Copyright (C) 2010 - 2013 Nikolay Koldunov <koldunovn@gmail.com> 
 """
@@ -216,6 +221,15 @@ def nc2d(parameters=['adxx_atemp'], ofile='adxx', iteration='0', bswap=1, sstart
 	I assume that if file contain more than one record it is xx or adxx file.
 	I put everything on the C grid!
 	
+	You have to have following files in the the directory where you run your code:
+
+	XC.data
+	XC.meta
+	YC.data
+	YC.meta
+	maskCtrlC.data
+	maskCtrlC.meta
+	
 	Input:
 	    parameters		- list with names of the variables.
 	    ofile 		- name of the output file.
@@ -310,6 +324,15 @@ def var_nc2d(parameters=['AREA','HEFF'], ofile='MIT_output_2d', bswap=1, sstart_
 
 	I put everything on the C grid!
 	
+	You have to have following files in the the directory where you run your code:
+
+	XC.data
+	XC.meta
+	YC.data
+	YC.meta
+	maskCtrlC.data
+	maskCtrlC.meta
+	
 	Input:
 	    parameters		- list with names of the variables (like AREA or AREAtave).
 	    ofile 		- name of the output file.
@@ -391,10 +414,21 @@ def var_nc2d(parameters=['AREA','HEFF'], ofile='MIT_output_2d', bswap=1, sstart_
 	
 def nc3d(parameters=['adxx_atemp'], ofile='adxx', iteration='0', bswap=1, sstart_date = "seconds since 2002-10-01 07:00", deltaT=1200, xx_period=240000.0, FillValue=-1.0e+23, meta=None, dump="no"):
 	'''
-	Convert 3d from adxx* and xx* fles to netCDF format with use of Nio module.
+	Convert 3d fields from adxx* and xx* fles to netCDF format with use of Nio module.
 	Names of the files should be defined in form of the list, even if we have only one variable.
 
 	I put everything on the C grid!
+	
+	You have to have following files in the the directory where you run your code:
+
+	XC.data
+	XC.meta
+	YC.data
+	YC.meta
+	DRC.data
+	DRC.meta
+	maskCtrlC.data
+	maskCtrlC.meta
 	
 	Input:
 	    parameters		- list with names of the variables.
@@ -490,10 +524,21 @@ def nc3d(parameters=['adxx_atemp'], ofile='adxx', iteration='0', bswap=1, sstart
 		
 def var_nc3d(parameters=['Ttave'], ofile='MIT_output_3d', bswap=1, sstart_date = "seconds since 2002-10-01 07:00", deltaT=1200, FillValue=-1.0e+23, dump="no"):
 	'''
-	Convert 3d from adxx* and xx* fles to netCDF format with use of Nio module.
+	Convert 3d fields produced by MITgcm to netCDF format with use of Nio module. 
 	Names of the files should be defined in form of the list, even if we have only one variable.
 
 	I put everything on the C grid!
+	
+	You have to have following files in the the directory where you run your code:
+
+	XC.data
+	XC.meta
+	YC.data
+	YC.meta
+	DRC.data
+	DRC.meta
+	maskCtrlC.data
+	maskCtrlC.meta
 	
 	Input:
 	    parameters		- list with names of the variables.
@@ -587,7 +632,7 @@ def var_nc3d(parameters=['Ttave'], ofile='MIT_output_3d', bswap=1, sstart_date =
 		return adatemp 
 		
 def gatrib(parname):
-	'''get attrubutes for variables'''
+	'''Return attrubutes for known variables'''
 	
 	if (parname == 'T') or (parname == 'Ttave'):
 		name = 'Potential Temperature'
