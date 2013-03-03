@@ -486,7 +486,106 @@ def nc3d(parameters=['adxx_atemp'], ofile='adxx', iteration='0', bswap=1, sstart
 	f.close()
 	if dump == 'yes':
 		return adatemp
+
+		
+def var_nc3d(parameters=['Ttave'], ofile='MIT_output_3d', bswap=1, sstart_date = "seconds since 2002-10-01 07:00", deltaT=1200, FillValue=-1.0e+23, dump="no"):
+	'''
+	Convert 3d from adxx* and xx* fles to netCDF format with use of Nio module.
+	Names of the files should be defined in form of the list, even if we have only one variable.
+
+	I put everything on the C grid!
 	
+	Input:
+	    parameters		- list with names of the variables.
+	    ofile 		- name of the output file.
+	    iteration		- iteration of optimisation, should be STRING!
+	    bswap       	- do we need a byte swap? Yes (1) or no (0) [default 1]
+	    sstart_date		- should be "seconds since", [default "seconds since 2002-10-01 07:00"
+	    deltaT		- time step in seconds
+	    xx_period		- xx_*period
+	    FillValue		- missing value
+	    meta		- flag to fix problem with wrong adxx*.meta files. 
+				  If meta = 'xx', use .meta file from xx files 
+	    dump 		- if dump='yes' will return numpy array with data
+	'''
+	lon = mitbin2('XC.data',bswap)[0,0,:,:]
+	lat = mitbin2('YC.data',bswap)[0,0,:,:]
+	lev = mitbin2('DRC.data',bswap)[0,:,0,0]
+	lev = numpy.cumsum(lev)
+	lsmask = mitbin2('maskCtrlC.data',bswap)[:,:,:,:]
+	
+	fileList = glob.glob(parameters[0]+"*.data")
+	
+	if os.path.exists(ofile+".nc") == True:
+		os.system("rm "+ofile+".nc")
+	
+	ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber = rmeta(fileList[0][:-4]+"meta")
+
+	ttime = numpy.zeros((len(fileList)))
+
+    
+	opt = Nio.options()
+	opt.PreFill = False
+	opt.HeaderReserveSpace = 4000
+	f = Nio.open_file(ofile+".nc","w",opt)
+
+	f.title = "MITgcm variables in netCDF format"
+	f.create_dimension('x',xdim)
+	f.create_dimension('y',ydim)
+	f.create_dimension('z',zdim)
+	f.create_dimension('time',ttime.shape[0])
+
+	f.create_variable('time','d',('time',))
+	f.variables['time'].units        = sstart_date 
+
+
+	f.create_variable('z','d',('z',))
+	f.variables['z'].units        = "meters" 
+	f.variables['z'][:] =  lev[:]
+
+	
+	f.create_variable('latitude','d',('x','y'))
+	f.variables['latitude'].long_name        = "latitude"
+	f.variables['latitude'].units            = "degrees_north"
+	f.variables['latitude'].standard_name    = "grid_latitude"
+	f.variables['latitude'][:] = lat[:]
+
+	f.create_variable('longitude','d',('x','y'))
+	f.variables['longitude'].long_name        = "longitude"
+	f.variables['longitude'].units            = "degrees_east"
+	f.variables['longitude'].standard_name    = "grid_longitude"
+	f.variables['longitude'][:] = lon[:]
+
+	#vvariables = ["atemp","aqh", "uwind", "vwind", ]
+	#vvariables = ["atemp"]
+
+	for parameter in parameters:
+		f.create_variable(parameter,'d',('time','z','x','y'))
+		
+		f.variables[parameter].long_name    = gatrib(parameter)[0]
+        	f.variables[parameter].units        = gatrib(parameter)[1]
+        	f.variables[parameter]._FillValue   = FillValue
+		f.variables[parameter].missing_value = FillValue
+	  
+		adatemp_final = numpy.zeros((len(fileList), zdim, xdim, ydim))
+		
+		for ind, fileName in enumerate(fileList):
+		  adatemp = mitbin2(parameter+fileName[-16:], bswap=bswap)[:,:,:,:]
+		  ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber = rmeta(fileName[:-4]+"meta")
+
+		#	adatemp = numpy.where(adatemp[:] > 1.0e+12, 0, adatemp[:])
+		  adatemp = numpy.where(adatemp[:] < -1.0e+20, FillValue, adatemp[:])
+		  adatemp = numpy.where(lsmask[:]==0, FillValue, adatemp[:])
+		  adatemp_final[ind,:,:,:] = adatemp
+		  ttime[ind] = timeStepNumber*deltaT
+		  
+
+	        f.variables[parameter][:] = adatemp
+		
+	f.close()
+	if dump == 'yes':
+		return adatemp 
+		
 def gatrib(parname):
 	'''get attrubutes for variables'''
 	
