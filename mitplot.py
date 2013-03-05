@@ -3,6 +3,9 @@
 
 
 """Komod plot module 
+Contain mostly set of wrapper functions for map plotting with [PyNGL](http://www.pyngl.ucar.edu/).
+Can be used with any 2D data, not necessarily MITgcm.
+
 coord2d 		- Convert 1d coordinates to 2d coordinates
 colormap 		- Define custom colormaps
 arctpl 			- plot contours of 2D, 3D or 4D field in the Arctic region from ndarray
@@ -14,7 +17,7 @@ plt_vectors     	- plot vector data from 2D fields
 plt_vectors_scalars 	- plot vectors and scalar filed (e.g. wind direction and speed)
 plt_vectors_colors      - plot colored vectors
  
-Nikolay Koldunov 23 February 2010
+Copyright (C) 2010 - 2013 Nikolay Koldunov <koldunovn@gmail.com> 
 """
 
 # -------------------------------------------------
@@ -28,6 +31,9 @@ import matplotlib.pyplot as plt
 
 def coord2d(lon, lat, dshape):
 	""" Convert 1d coordinates to 2d coordinates.
+	This function was created before I find out about numpy.meshgrid :)
+	Keep it for backward compatibility.
+	
 	Usage; coord2d(lat, lon, dshape)
 	Input:
 	    lat - 1d latitudes
@@ -58,7 +64,8 @@ def coord2d(lon, lat, dshape):
 
 
 def colormap(colormapname):
-	""" define custom colormaps
+	""" Define custom colormaps.
+	
 	Usage: colormap(colormapname)
 	Input:
 		colormapname - name of the custom color map
@@ -94,10 +101,182 @@ def colormap(colormapname):
 				
 	return cmap
 
+def reg(region, minLon=0, maxLon=360 , minLat=-80 , maxLat=85):
+  
+	mapDict = {}
+	
+  	if region == 'Arctic':
+		mapDict.update({"mpProjection":"LambertEqualArea"}) 
+		mapDict.update({"mpDataBaseVersion":"LowRes"}) 
+		mapDict.update({"mpGeophysicalLineThicknessF": 4}) 
+		mapDict.update({"mpLimitMode":"Corners"}) 
+		mapDict.update({"mpLeftCornerLatF":54}) 
+		mapDict.update({"mpLeftCornerLonF":-50}) 
+		mapDict.update({"mpRightCornerLatF":57}) 
+		mapDict.update({"mpRightCornerLonF":140}) 
+		mapDict.update({"mpCenterLonF":0.}) 
+		mapDict.update({"mpCenterLatF":90})
+		mapDict.update({"mpMinLonF":minLon})
+		mapDict.update({"mpMaxLonF":maxLon})
+		mapDict.update({"mpMinLatF":minLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpGridLonSpacingF":15})
+		mapDict.update({"mpGridLatSpacingF":5})
+
+	elif region == 'Global':
+		
+		mapDict.update({"mpProjection":"CylindricalEquidistant"}) 
+		mapDict.update({"mpDataBaseVersion":"MediumRes"}) 
+		mapDict.update({"mpGeophysicalLineThicknessF": 4}) 
+		mapDict.update({"mpLimitMode":"LatLon"}) 
+		mapDict.update({"mpLeftCornerLatF":0}) 
+		mapDict.update({"mpLeftCornerLonF":0}) 
+		mapDict.update({"mpRightCornerLatF":0}) 
+		mapDict.update({"mpRightCornerLonF":0}) 
+		mapDict.update({"mpCenterLonF":180.}) 
+		mapDict.update({"mpCenterLatF":0})
+		mapDict.update({"mpMinLonF":minLon})
+		mapDict.update({"mpMaxLonF":maxLon})
+		mapDict.update({"mpMinLatF":minLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpGridLonSpacingF":15})
+		mapDict.update({"mpGridLatSpacingF":5})
+		
+		
+	elif region == 'NAtlantic':
+		
+		mapDict.update({"mpProjection":"LambertEqualArea"}) 
+		mapDict.update({"mpDataBaseVersion":"MediumRes"}) 
+		mapDict.update({"mpGeophysicalLineThicknessF": 4}) 
+		mapDict.update({"mpLimitMode":"Corners"}) 
+		mapDict.update({"mpLeftCornerLatF":65}) 
+		mapDict.update({"mpLeftCornerLonF":-20}) 
+		mapDict.update({"mpRightCornerLatF":70}) 
+		mapDict.update({"mpRightCornerLonF":100}) 
+		mapDict.update({"mpCenterLonF":0.}) 
+		mapDict.update({"mpCenterLatF":90})
+		mapDict.update({"mpMinLonF":minLon})
+		mapDict.update({"mpMaxLonF":maxLon})
+		mapDict.update({"mpMinLatF":minLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpGridLonSpacingF":15})
+		mapDict.update({"mpGridLatSpacingF":5})
+		
+
+	
+	elif region == 'stanna':
+	  
+	  	mapDict.update({"mpProjection":"LambertEqualArea"}) 
+		mapDict.update({"mpDataBaseVersion":"MediumRes"}) 
+		mapDict.update({"mpGeophysicalLineThicknessF": 4}) 
+		mapDict.update({"mpLimitMode":"Corners"}) 
+		mapDict.update({"mpLeftCornerLatF":80}) 
+		mapDict.update({"mpLeftCornerLonF":25}) 
+		mapDict.update({"mpRightCornerLatF":70}) 
+		mapDict.update({"mpRightCornerLonF":100}) 
+		mapDict.update({"mpCenterLonF":0.}) 
+		mapDict.update({"mpCenterLatF":90})
+		mapDict.update({"mpMinLonF":minLon})
+		mapDict.update({"mpMaxLonF":maxLon})
+		mapDict.update({"mpMinLatF":minLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpGridLonSpacingF":15})
+		mapDict.update({"mpGridLatSpacingF":5})
+	
+	elif region == "Monarch":
+		
+	  	mapDict.update({"mpProjection":"LambertEqualArea"}) 
+		mapDict.update({"mpDataBaseVersion":"LowRes"}) 
+		mapDict.update({"mpGeophysicalLineThicknessF": 4}) 
+		mapDict.update({"mpLimitMode":"Corners"}) 
+		mapDict.update({"mpLeftCornerLatF":33}) 
+		mapDict.update({"mpLeftCornerLonF":-70}) 
+		mapDict.update({"mpRightCornerLatF":40}) 
+		mapDict.update({"mpRightCornerLonF":110}) 
+		mapDict.update({"mpCenterLonF":-34.}) 
+		mapDict.update({"mpCenterLatF":90})
+		mapDict.update({"mpMinLonF":minLon})
+		mapDict.update({"mpMaxLonF":maxLon})
+		mapDict.update({"mpMinLatF":minLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpGridLonSpacingF":15})
+		mapDict.update({"mpGridLatSpacingF":5})
+	  
+	elif region == 'halo':
+	      	
+	      	mapDict.update({"mpProjection":"LambertEqualArea"}) 
+		mapDict.update({"mpDataBaseVersion":"MediumRes"}) 
+		mapDict.update({"mpGeophysicalLineThicknessF": 4}) 
+		mapDict.update({"mpLimitMode":"Corners"}) 
+		mapDict.update({"mpLeftCornerLatF":85}) 
+		mapDict.update({"mpLeftCornerLonF":0}) 
+		mapDict.update({"mpRightCornerLatF":65}) 
+		mapDict.update({"mpRightCornerLonF":120}) 
+		mapDict.update({"mpCenterLonF":0.}) 
+		mapDict.update({"mpCenterLatF":90})
+		mapDict.update({"mpMinLonF":minLon})
+		mapDict.update({"mpMaxLonF":maxLon})
+		mapDict.update({"mpMinLatF":minLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpGridLonSpacingF":15})
+		mapDict.update({"mpGridLatSpacingF":5})
+	  
+	elif region == 'FramStAnna':
+	  
+	  	mapDict.update({"mpProjection":"LambertEqualArea"}) 
+		mapDict.update({"mpDataBaseVersion":"MediumRes"}) 
+		mapDict.update({"mpGeophysicalLineThicknessF": 4}) 
+		mapDict.update({"mpLimitMode":"Corners"}) 
+		mapDict.update({"mpLeftCornerLatF":75}) 
+		mapDict.update({"mpLeftCornerLonF":-5}) 
+		mapDict.update({"mpRightCornerLatF":75}) 
+		mapDict.update({"mpRightCornerLonF":120}) 
+		mapDict.update({"mpCenterLonF":0.}) 
+		mapDict.update({"mpCenterLatF":90})
+		mapDict.update({"mpMinLonF":minLon})
+		mapDict.update({"mpMaxLonF":maxLon})
+		mapDict.update({"mpMinLatF":minLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpGridLonSpacingF":15})
+		mapDict.update({"mpGridLatSpacingF":5})
+
+	elif region == 'Fram2':
+	  
+	  	mapDict.update({"mpProjection":"LambertEqualArea"}) 
+		mapDict.update({"mpDataBaseVersion":"MediumRes"}) 
+		mapDict.update({"mpGeophysicalLineThicknessF": 4}) 
+		mapDict.update({"mpLimitMode":"Corners"}) 
+		mapDict.update({"mpLeftCornerLatF":75}) 
+		mapDict.update({"mpLeftCornerLonF":0}) 
+		mapDict.update({"mpRightCornerLatF":77}) 
+		mapDict.update({"mpRightCornerLonF":90}) 
+		mapDict.update({"mpCenterLonF":0.}) 
+		mapDict.update({"mpCenterLatF":90})
+		mapDict.update({"mpMinLonF":minLon})
+		mapDict.update({"mpMaxLonF":maxLon})
+		mapDict.update({"mpMinLatF":minLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpMaxLatF":maxLat})
+		mapDict.update({"mpGridLonSpacingF":15})
+		mapDict.update({"mpGridLatSpacingF":5})
+
+			
+	return mapDict
 
 				
-def arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None, showfig=True, psname="output", colormap_name='testcmap', start_color=2, end_color=-2, vtitle="values", raster_fill=False, miss=None,levon=False,llevel=None, add_cyclic=False, region='Arctic', minLon=0, maxLon=360 , minLat=-80 , maxLat=85):
-	""" Plot variable from array in the Arctic region
+def arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None,\
+    showfig=True, psname="output", colormap_name='testcmap', start_color=2,\
+    end_color=-2, vtitle="values", raster_fill=False, miss=None,levon=False,\
+    llevel=None, add_cyclic=False, region='Arctic', \
+    minLon=0, maxLon=360 , minLat=-80 , maxLat=85):
+	""" Plot variable from array in the Arctic region.
 	
 	Usage:
 		arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None, showfig=True, psname="output", colormap_name='posneg_1', start_color=2, end_color=-2, vtitle="values"):
@@ -105,15 +284,24 @@ def arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None, showfig=Tr
 	Input:
 		lon 		- 2D array of longitudes
 		lat 		- 2D array of latitudes
-		data 		- 2D, 3D or 4D array of scalar data.Two last dimensions should be lon/lat
-		datamin 	- minimum value, if not specified will be calculated as data.min() for the first time step and level
-		datamax 	- maximum value, if not specified will be calculated as data.max() for the first time step and level
-		datastep 	- interval between isolines, if not specified will be calculated as abs(datamax-datamin)/20
+		data 		- 2D, 3D or 4D array of scalar data.
+				  Two last dimensions should be lon/lat
+		datamin 	- minimum value, if not specified will be 
+				  calculated as data.min() for the first time step and level
+		datamax 	- maximum value, if not specified will be 
+				  calculated as data.max() for the first time step and level
+		datastep 	- interval between isolines, if not specified will be
+				  calculated as abs(datamax-datamin)/20
 		showfig 	- if True display the figure with gv
 		psname 		- name of the output .ps file, default - "output"
-		colormap_name 	- name of the PyNGL of custom colormap. Custom colormaps should be defined in komod.colormap function. Color table for PyNGL can be found here http://www.pyngl.ucar.edu/Graphics/color_table_gallery.shtml
-		start_color 	- number of the color in the PyNGL or custom colormap to start from, default = 2
-		end_color  	- number of the color in the PyNGL or custom colormap to end with, default = -2
+		colormap_name 	- name of the PyNGL of custom colormap. 
+				  Custom colormaps should be defined in komod.colormap function.
+				  Color table for PyNGL can be found here 
+				  http://www.pyngl.ucar.edu/Graphics/color_table_gallery.shtml
+		start_color 	- number of the color in the PyNGL 
+				  or custom colormap to start from, default = 2
+		end_color  	- number of the color in the PyNGL 
+				  or custom colormap to end with, default = -2
 		vtitle 		- units of the data
 		raster_fill	- switch between AreaFill and RasterFill.
 		miss            - missing value
@@ -139,52 +327,28 @@ def arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None, showfig=Tr
 	resources.sfXArray        = lon[:]
 	resources.sfYArray        = lat[:]
 	
+	mapDict = reg(region, minLon, maxLon , minLat , maxLat)
 	
-	if region == 'Arctic':
-		resources.mpProjection          = "LambertEqualArea"
+	resources.mpProjection          = mapDict['mpProjection']
 		
-		resources.mpDataBaseVersion     = "LowRes"
-		resources.mpGeophysicalLineThicknessF = 4
-		resources.mpLimitMode           = 'Corners'
-		resources.mpLeftCornerLatF      = 54
-		resources.mpLeftCornerLonF      = -50
-		resources.mpRightCornerLatF     = 57
-		resources.mpRightCornerLonF     = 140
-		resources.mpCenterLonF           = 0.
-		resources.mpCenterLatF           = 90.
-	elif region == 'Global':
-		resources.mpProjection          = "CylindricalEquidistant"
-		resources.mpDataBaseVersion     = "MediumRes"
-		resources.mpLimitMode           = "LatLon"
-		resources.mpMinLonF             = minLon
-		resources.mpMaxLonF             = maxLon
-		resources.mpMinLatF             = minLat
-		resources.mpMaxLatF             = maxLat
-		resources.mpCenterLonF           = 180.
-		resources.mpCenterLatF           = 0.
-	elif region == 'NAtlantic':
-		resources.mpProjection          = "LambertEqualArea"
-		resources.mpDataBaseVersion     = "MediumRes"
-		resources.mpLimitMode           = 'Corners'
-		resources.mpLeftCornerLatF      = 65
-		resources.mpLeftCornerLonF      = -20
-		resources.mpRightCornerLatF     = 70
-		resources.mpRightCornerLonF     = 100
-		resources.mpCenterLonF           = 0.
-		resources.mpCenterLatF           = 90.
-	
-	elif region == 'stanna':
-		resources.mpProjection          = "LambertEqualArea"
-		resources.mpDataBaseVersion     = "MediumRes"
-		resources.mpLimitMode           = 'Corners'
-		resources.mpLeftCornerLatF      = 80
-		resources.mpLeftCornerLonF      = 25
-		resources.mpRightCornerLatF     = 70
-		resources.mpRightCornerLonF     = 100
-		resources.mpCenterLonF           = 0.
-		resources.mpCenterLatF           = 90.	
-		resources.mpGridLonSpacingF    = 15
-		resources.mpGridLatSpacingF    = 5
+	resources.mpDataBaseVersion     = mapDict['mpDataBaseVersion']
+	resources.mpGeophysicalLineThicknessF = mapDict['mpGeophysicalLineThicknessF']
+	resources.mpLimitMode           = mapDict['mpLimitMode']
+	resources.mpLeftCornerLatF      = mapDict['mpLeftCornerLatF']
+	resources.mpLeftCornerLonF      = mapDict['mpLeftCornerLonF']
+	resources.mpRightCornerLatF     = mapDict['mpRightCornerLatF']
+	resources.mpRightCornerLonF     = mapDict['mpRightCornerLonF']
+	resources.mpCenterLonF          = mapDict['mpCenterLonF']
+	resources.mpCenterLatF          = mapDict['mpCenterLatF']
+	resources.mpMinLonF             = mapDict['mpMinLonF']
+	resources.mpMaxLonF             = mapDict['mpMaxLonF']
+	resources.mpMinLatF             = mapDict['mpMinLatF']
+	resources.mpMaxLatF             = mapDict['mpMaxLatF']
+	resources.mpGridLonSpacingF     = mapDict['mpGridLonSpacingF']
+	resources.mpGridLatSpacingF     = mapDict['mpGridLatSpacingF']
+		
+		
+
 		
 	resources.mpShapeMode    = 'FixedAspectFitBB'
 	resources.cnFillDotSizeF    = 1
@@ -206,7 +370,7 @@ def arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None, showfig=Tr
 	
 	
 	resources.cnLevelSelectionMode  = "ExplicitLevels" # Define own levels.
-	resources.cnLevels              = numpy.arange(datamin, datamax, datastep)
+	#resources.cnLevels              = numpy.arange(datamin, datamax, datastep)
 	
 	resources.lbTitleString             = vtitle
 	resources.lbTitleFontHeightF        = 0.022
@@ -371,29 +535,26 @@ def arctpltnc( data_file, variable_name, lon="lon", lat="lat", region = "Arctic"
 	
 	resources.sfXArray        = lonnn[:]
 	resources.sfYArray        = lattt[:]
-	if region == "Arctic":
-		resources.mpProjection          = "LambertEqualArea"
-		resources.mpDataBaseVersion     = "LowRes"
-		resources.mpLimitMode           = 'Corners'
-		resources.mpLeftCornerLatF      = 54
-		resources.mpLeftCornerLonF      = -50
-		resources.mpRightCornerLatF     = 57
-		resources.mpRightCornerLonF     = 140
-		resources.mpCenterLonF           = 0.
-		resources.mpCenterLatF           = 90.
-
-	if region == "Monarch":  
-        	resources.mpProjection          = "LambertEqualArea"
-
- 	   	resources.mpDataBaseVersion     = "LowRes"
-   		#resources.mpGeophysicalLineThicknessF = coastThick
-   		resources.mpLimitMode           = 'Corners'
-   		resources.mpLeftCornerLatF      = 33
-    		resources.mpLeftCornerLonF      = -70
-    		resources.mpRightCornerLatF     = 40
-    		resources.mpRightCornerLonF     = 110
-    		resources.mpCenterLonF           = -34.
-    		resources.mpCenterLatF           = 90.
+	
+	mapDict = reg(region)
+	
+	resources.mpProjection          = mapDict['mpProjection']
+		
+	resources.mpDataBaseVersion     = mapDict['mpDataBaseVersion']
+	resources.mpGeophysicalLineThicknessF = mapDict['mpGeophysicalLineThicknessF']
+	resources.mpLimitMode           = mapDict['mpLimitMode']
+	resources.mpLeftCornerLatF      = mapDict['mpLeftCornerLatF']
+	resources.mpLeftCornerLonF      = mapDict['mpLeftCornerLonF']
+	resources.mpRightCornerLatF     = mapDict['mpRightCornerLatF']
+	resources.mpRightCornerLonF     = mapDict['mpRightCornerLonF']
+	resources.mpCenterLonF          = mapDict['mpCenterLonF']
+	resources.mpCenterLatF          = mapDict['mpCenterLatF']
+	resources.mpMinLonF             = mapDict['mpMinLonF']
+	resources.mpMaxLonF             = mapDict['mpMaxLonF']
+	resources.mpMinLatF             = mapDict['mpMinLatF']
+	resources.mpMaxLatF             = mapDict['mpMaxLatF']
+	resources.mpGridLonSpacingF     = mapDict['mpGridLonSpacingF']
+	resources.mpGridLatSpacingF     = mapDict['mpGridLatSpacingF']
 
 	resources.mpShapeMode    = 'FixedAspectFitBB'
 	resources.cnFillDotSizeF    = 1
@@ -1100,64 +1261,26 @@ def pltgrdnc(data_file, variable_name, lon="lon", lat="lat", every=1, coastThick
   resources.sfXArray        = lonnn[::every,::every]
   resources.sfYArray        = lattt[::every,::every]
   
-  if region == 'Arctic':
-	resources.mpProjection          = "LambertEqualArea"
+  mapDict = reg(region, minLon, maxLon , minLat , maxLat)
+  
+  resources.mpProjection          = mapDict['mpProjection']
 		
-	resources.mpDataBaseVersion     = "LowRes"
-	resources.mpGeophysicalLineThicknessF = coastThick
-	resources.mpLimitMode           = 'Corners'
-	resources.mpLeftCornerLatF      = 54
-	resources.mpLeftCornerLonF      = -50
-	resources.mpRightCornerLatF     = 57
-	resources.mpRightCornerLonF     = 140
-	resources.mpCenterLonF           = 0.
-	resources.mpCenterLatF           = 90.
-  if region == "Monarch":  
-        resources.mpProjection          = "LambertEqualArea"
-
-    	resources.mpDataBaseVersion     = "LowRes"
-   	resources.mpGeophysicalLineThicknessF = coastThick
-   	resources.mpLimitMode           = 'Corners'
-   	resources.mpLeftCornerLatF      = 20
-    	resources.mpLeftCornerLonF      = -41
-    	resources.mpRightCornerLatF     = 30
-    	resources.mpRightCornerLonF     = 138
-    	resources.mpCenterLonF           = 0.
-    	resources.mpCenterLatF           = 90.
-
-  elif region == 'Global':
-	resources.mpProjection          = "LambertEqualArea"
-	resources.mpDataBaseVersion     = "LowRes"
-	resources.mpGeophysicalLineThicknessF = coastThick
-	resources.mpLimitMode           = "LatLon"
-	resources.mpMinLonF             = minLon
-	resources.mpMaxLonF             = maxLon
-	resources.mpMinLatF             = minLat
-	resources.mpMaxLatF             = maxLat
-	resources.mpCenterLonF           = 0.
-	resources.mpCenterLatF           = 0.
-  elif region == 'NAtlantic':
-	resources.mpProjection          = "LambertEqualArea"
-	resources.mpDataBaseVersion     = "MediumRes"
-	resources.mpGeophysicalLineThicknessF = coastThick
-	resources.mpLimitMode           = 'Corners'
-	resources.mpLeftCornerLatF      = 65
-	resources.mpLeftCornerLonF      = -20
-	resources.mpRightCornerLatF     = 70
-	resources.mpRightCornerLonF     = 100
-	resources.mpCenterLonF           = 0.
-	resources.mpCenterLatF           = 90.
-  elif region == 'halo':
-	resources.mpProjection          = "LambertEqualArea"
-	resources.mpDataBaseVersion     = "MediumRes"
-	resources.mpGeophysicalLineThicknessF = coastThick
-	resources.mpLimitMode           = 'Corners'
-	resources.mpLeftCornerLatF      = 85
-	resources.mpLeftCornerLonF      = 0
-	resources.mpRightCornerLatF     = 65
-	resources.mpRightCornerLonF     = 120
-	resources.mpCenterLonF           = 0.
-	resources.mpCenterLatF           = 90.
+  resources.mpDataBaseVersion     = mapDict['mpDataBaseVersion']
+  resources.mpGeophysicalLineThicknessF = mapDict['mpGeophysicalLineThicknessF']
+  resources.mpLimitMode           = mapDict['mpLimitMode']
+  resources.mpLeftCornerLatF      = mapDict['mpLeftCornerLatF']
+  resources.mpLeftCornerLonF      = mapDict['mpLeftCornerLonF']
+  resources.mpRightCornerLatF     = mapDict['mpRightCornerLatF']
+  resources.mpRightCornerLonF     = mapDict['mpRightCornerLonF']
+  resources.mpCenterLonF          = mapDict['mpCenterLonF']
+  resources.mpCenterLatF          = mapDict['mpCenterLatF']
+  resources.mpMinLonF             = mapDict['mpMinLonF']
+  resources.mpMaxLonF             = mapDict['mpMaxLonF']
+  resources.mpMinLatF             = mapDict['mpMinLatF']
+  resources.mpMaxLatF             = mapDict['mpMaxLatF']
+  resources.mpGridLonSpacingF     = mapDict['mpGridLonSpacingF']
+  resources.mpGridLatSpacingF     = mapDict['mpGridLatSpacingF']
+		
 
   resources.mpShapeMode    = 'FixedAspectFitBB'
 
@@ -1457,50 +1580,26 @@ def plt_vectors(lon, lat, u_wind, v_wind, MinFracLengthF = 0.005, RefMagnitudeF 
 	resources.vfXArray     = lon_reshape
 	resources.vfYArray     = lat_reshape
 	
+	mapDict = reg(region, minLon, maxLon , minLat , maxLat)
 	
-	
-	if region == 'Arctic':
-		resources.mpProjection          = "LambertEqualArea"
+	resources.mpProjection          = mapDict['mpProjection']
 		
-		resources.mpDataBaseVersion     = "LowRes"
-		resources.mpGeophysicalLineThicknessF = 4
-		resources.mpLimitMode           = 'Corners'
-		resources.mpLeftCornerLatF      = 54
-		resources.mpLeftCornerLonF      = -50
-		resources.mpRightCornerLatF     = 57
-		resources.mpRightCornerLonF     = 140
-		resources.mpCenterLonF           = 0.
-		resources.mpCenterLatF           = 90.
-	elif region == 'Global':
-		resources.mpProjection          = "LambertEqualArea"
-		resources.mpDataBaseVersion     = "LowRes"
-		resources.mpLimitMode           = "LatLon"
-		resources.mpMinLonF             = minLon
-		resources.mpMaxLonF             = maxLon
-		resources.mpMinLatF             = minLat
-		resources.mpMaxLatF             = maxLat
-		resources.mpCenterLonF           = 0.
-		resources.mpCenterLatF           = 0.
-	elif region == 'NAtlantic':
-		resources.mpProjection          = "LambertEqualArea"
-		resources.mpDataBaseVersion     = "MediumRes"
-		resources.mpLimitMode           = 'Corners'
-		resources.mpLeftCornerLatF      = 65
-		resources.mpLeftCornerLonF      = -20
-		resources.mpRightCornerLatF     = 70
-		resources.mpRightCornerLonF     = 100
-		resources.mpCenterLonF           = 0.
-		resources.mpCenterLatF           = 90.
-	elif region == 'halo':
-		resources.mpProjection          = "LambertEqualArea"
-		resources.mpDataBaseVersion     = "MediumRes"
-		resources.mpLimitMode           = 'Corners'
-		resources.mpLeftCornerLatF      = 85
-		resources.mpLeftCornerLonF      = 0
-		resources.mpRightCornerLatF     = 65
-		resources.mpRightCornerLonF     = 120
-		resources.mpCenterLonF           = 0.
-		resources.mpCenterLatF           = 90.
+	resources.mpDataBaseVersion     = mapDict['mpDataBaseVersion']
+	resources.mpGeophysicalLineThicknessF = mapDict['mpGeophysicalLineThicknessF']
+	resources.mpLimitMode           = mapDict['mpLimitMode']
+	resources.mpLeftCornerLatF      = mapDict['mpLeftCornerLatF']
+	resources.mpLeftCornerLonF      = mapDict['mpLeftCornerLonF']
+	resources.mpRightCornerLatF     = mapDict['mpRightCornerLatF']
+	resources.mpRightCornerLonF     = mapDict['mpRightCornerLonF']
+	resources.mpCenterLonF          = mapDict['mpCenterLonF']
+	resources.mpCenterLatF          = mapDict['mpCenterLatF']
+	resources.mpMinLonF             = mapDict['mpMinLonF']
+	resources.mpMaxLonF             = mapDict['mpMaxLonF']
+	resources.mpMinLatF             = mapDict['mpMinLatF']
+	resources.mpMaxLatF             = mapDict['mpMaxLatF']
+	resources.mpGridLonSpacingF     = mapDict['mpGridLonSpacingF']
+	resources.mpGridLatSpacingF     = mapDict['mpGridLatSpacingF']
+		
 	
 	
 	resources.mpFillOn     = True 
@@ -1583,72 +1682,26 @@ def plt_vectors_scalars(lon, lat, u_wind, v_wind, scalar_data, datamin = -2., da
 	if sfMissingValueV != None:
 		cnres.sfMissingValueV = sfMissingValueV
 	
+	mapDict = reg(region, minLon, maxLon , minLat , maxLat)
 	
-	if region == 'Arctic':
-		mapres.mpProjection          = "LambertEqualArea"
-		mapres.mpDataBaseVersion     = "LowRes"
-		mapres.mpLimitMode           = 'Corners'
-		mapres.mpLeftCornerLatF      = 54
-		mapres.mpLeftCornerLonF      = -50
-		mapres.mpRightCornerLatF     = 57
-		mapres.mpRightCornerLonF     = 140
-		mapres.mpCenterLonF           = 0.
-		mapres.mpCenterLatF           = 90.
-			
-	elif region == 'Global':
-		mapres.mpProjection          = "LambertEqualArea"
-		mapres.mpDataBaseVersion     = "LowRes"
-		mapres.mpLimitMode           = "LatLon"
-		mapres.mpMinLonF             = minLon
-		mapres.mpMaxLonF             = maxLon
-		mapres.mpMinLatF             = minLat
-		mapres.mpMaxLatF             = maxLat
-		mapres.mpCenterLonF           = 0.
-		mapres.mpCenterLatF           = 0.
-	elif region == 'NAtlantic':
-		mapres.mpProjection          = "LambertEqualArea"
-		mapres.mpDataBaseVersion     = "MediumRes"
-		mapres.mpLimitMode           = 'Corners'
-		mapres.mpLeftCornerLatF      = 65
-		mapres.mpLeftCornerLonF      = -20
-		mapres.mpRightCornerLatF     = 70
-		mapres.mpRightCornerLonF     = 100
-		mapres.mpCenterLonF           = 0.
-		mapres.mpCenterLatF           = 90.
-	elif region == 'FramStAnna':
-		mapres.mpProjection          = "LambertEqualArea"
-		mapres.mpDataBaseVersion     = "MediumRes"
-		mapres.mpLimitMode           = 'Corners'
-		mapres.mpLeftCornerLatF      = 75
-		mapres.mpLeftCornerLonF      = -5
-		mapres.mpRightCornerLatF     = 75
-		mapres.mpRightCornerLonF     = 120
-		mapres.mpCenterLonF           = 0.
-		mapres.mpCenterLatF           = 90.
-	if region == 'Fram2':
-    		mapres.mpProjection          = "LambertEqualArea"
-    		mapres.mpDataBaseVersion     = "MediumRes"
-    		mapres.mpLimitMode           = 'Corners'
-    		mapres.mpLeftCornerLatF      = 75
-    		mapres.mpLeftCornerLonF      = 0
-    		mapres.mpRightCornerLatF     = 77
-    		mapres.mpRightCornerLonF     = 90
-    		mapres.mpCenterLonF           = 0.
-    		mapres.mpCenterLatF           = 90.
-    		mapres.mpGridLonSpacingF    = 15
-    		mapres.mpGridLatSpacingF    = 5
-
-	elif region == 'halo':
-		mapres.mpProjection          = "LambertEqualArea"
-		mapres.mpDataBaseVersion     = "MediumRes"
-		mapres.mpLimitMode           = 'Corners'
-		mapres.mpLeftCornerLatF      = 82
-		mapres.mpLeftCornerLonF      = 50
-		mapres.mpRightCornerLatF     = 75
-		mapres.mpRightCornerLonF     = 120
-		mapres.mpCenterLonF           = 0.
-		mapres.mpCenterLatF           = 90.
-
+	mapres.mpProjection          = mapDict['mpProjection']
+		
+	mapres.mpDataBaseVersion     = mapDict['mpDataBaseVersion']
+	mapres.mpGeophysicalLineThicknessF = mapDict['mpGeophysicalLineThicknessF']
+	mapres.mpLimitMode           = mapDict['mpLimitMode']
+	mapres.mpLeftCornerLatF      = mapDict['mpLeftCornerLatF']
+	mapres.mpLeftCornerLonF      = mapDict['mpLeftCornerLonF']
+	mapres.mpRightCornerLatF     = mapDict['mpRightCornerLatF']
+	mapres.mpRightCornerLonF     = mapDict['mpRightCornerLonF']
+	mapres.mpCenterLonF          = mapDict['mpCenterLonF']
+	mapres.mpCenterLatF          = mapDict['mpCenterLatF']
+	mapres.mpMinLonF             = mapDict['mpMinLonF']
+	mapres.mpMaxLonF             = mapDict['mpMaxLonF']
+	mapres.mpMinLatF             = mapDict['mpMinLatF']
+	mapres.mpMaxLatF             = mapDict['mpMaxLatF']
+	mapres.mpGridLonSpacingF     = mapDict['mpGridLonSpacingF']
+	mapres.mpGridLatSpacingF     = mapDict['mpGridLatSpacingF']
+	
 	mapres.mpFillOn     = True 
 	igray = Ngl.new_color(wks,0.7,0.7,0.7)
 	mapres.mpFillColors = [0,-1,igray,-1]
@@ -1755,98 +1808,25 @@ def plt_vectors_colors(lon, lat, u_wind, v_wind, scalar_data, datamin = -2., dat
 			vcres.tiMainString = ddate.ctime()[4:]
 	
 	
-	if region == 'Arctic':
-		vcres.mpProjection          = "LambertEqualArea"
-		vcres.mpDataBaseVersion     = "LowRes"
-		vcres.mpLimitMode           = 'Corners'
-		vcres.mpLeftCornerLatF      = 54
-		vcres.mpLeftCornerLonF      = -50
-		vcres.mpRightCornerLatF     = 57
-		vcres.mpRightCornerLonF     = 140
-		vcres.mpCenterLonF           = 0.
-		vcres.mpCenterLatF           = 90.
-			
-	elif region == 'Global':
-		vcres.mpProjection          = "LambertEqualArea"
-		vcres.mpDataBaseVersion     = "LowRes"
-		vcres.mpLimitMode           = "LatLon"
-		vcres.mpMinLonF             = minLon
-		vcres.mpMaxLonF             = maxLon
-		vcres.mpMinLatF             = minLat
-		vcres.mpMaxLatF             = maxLat
-		vcres.mpCenterLonF           = 0.
-		vcres.mpCenterLatF           = 0.
-	elif region == 'NAtlantic':
-		vcres.mpProjection          = "LambertEqualArea"
-		vcres.mpDataBaseVersion     = "MediumRes"
-		vcres.mpLimitMode           = 'Corners'
-		vcres.mpLeftCornerLatF      = 65
-		vcres.mpLeftCornerLonF      = -20
-		vcres.mpRightCornerLatF     = 70
-		vcres.mpRightCornerLonF     = 100
-		vcres.mpCenterLonF           = 0.
-		vcres.mpCenterLatF           = 90.
-	elif region == 'FramStAnna':
-		vcres.mpProjection          = "LambertEqualArea"
-		vcres.mpDataBaseVersion     = "MediumRes"
-		vcres.mpLimitMode           = 'Corners'
-		vcres.mpLeftCornerLatF      = 75
-		vcres.mpLeftCornerLonF      = -5
-		vcres.mpRightCornerLatF     = 75
-		vcres.mpRightCornerLonF     = 120
-		vcres.mpCenterLonF           = 0.
-		vcres.mpCenterLatF           = 90.
-	elif region == 'Arctic2':
-		vcres.mpProjection          = "LambertEqualArea"
-		vcres.mpDataBaseVersion     = "MediumRes"
-		vcres.mpLimitMode           = 'Corners'
-		vcres.mpLeftCornerLatF      = 70
-		vcres.mpLeftCornerLonF      = -60
-		vcres.mpRightCornerLatF     = 60
-		vcres.mpRightCornerLonF     = 140
-		vcres.mpCenterLonF           = 0.
-		vcres.mpCenterLatF           = 90.
-	elif region == 'Anna':
-		vcres.mpProjection          = "LambertEqualArea"
-		vcres.mpDataBaseVersion     = "MediumRes"
-		vcres.mpLimitMode           = 'Corners'
-		vcres.mpLeftCornerLatF      = 83
-		vcres.mpLeftCornerLonF      = 20
-		vcres.mpRightCornerLatF     = 77
-		vcres.mpRightCornerLonF     = 90
-		vcres.mpCenterLonF           = 0.
-		vcres.mpCenterLatF           = 90.
-	elif region == 'Anna2':
-		vcres.mpProjection          = "LambertEqualArea"
-		vcres.mpDataBaseVersion     = "MediumRes"
-		vcres.mpLimitMode           = 'Corners'
-		vcres.mpLeftCornerLatF      = 82
-		vcres.mpLeftCornerLonF      = 60
-		vcres.mpRightCornerLatF     = 80
-		vcres.mpRightCornerLonF     = 82
-		vcres.mpCenterLonF           = 0.
-		vcres.mpCenterLatF           = 90.
+	mapDict = reg(region, minLon, maxLon , minLat , maxLat)
+	
+	vcres.mpProjection          = mapDict['mpProjection']
 		
-	elif region == 'Anna3':
-		vcres.mpProjection          = "LambertEqualArea"
-		vcres.mpDataBaseVersion     = "MediumRes"
-		vcres.mpLimitMode           = 'Corners'
-		vcres.mpLeftCornerLatF      = 70
-		vcres.mpLeftCornerLonF      = 10
-		vcres.mpRightCornerLatF     = 77
-		vcres.mpRightCornerLonF     = 90
-		vcres.mpCenterLonF           = 0.
-		vcres.mpCenterLatF           = 90.
-	elif region == 'halo':
-		vcres.mpProjection          = "LambertEqualArea"
-		vcres.mpDataBaseVersion     = "MediumRes"
-		vcres.mpLimitMode           = 'Corners'
-		vcres.mpLeftCornerLatF      = 85
-		vcres.mpLeftCornerLonF      = 0
-		vcres.mpRightCornerLatF     = 65
-		vcres.mpRightCornerLonF     = 120
-		vcres.mpCenterLonF           = 0.
-		vcres.mpCenterLatF           = 90.
+	vcres.mpDataBaseVersion     = mapDict['mpDataBaseVersion']
+	vcres.mpGeophysicalLineThicknessF = mapDict['mpGeophysicalLineThicknessF']
+	vcres.mpLimitMode           = mapDict['mpLimitMode']
+	vcres.mpLeftCornerLatF      = mapDict['mpLeftCornerLatF']
+	vcres.mpLeftCornerLonF      = mapDict['mpLeftCornerLonF']
+	vcres.mpRightCornerLatF     = mapDict['mpRightCornerLatF']
+	vcres.mpRightCornerLonF     = mapDict['mpRightCornerLonF']
+	vcres.mpCenterLonF          = mapDict['mpCenterLonF']
+	vcres.mpCenterLatF          = mapDict['mpCenterLatF']
+	vcres.mpMinLonF             = mapDict['mpMinLonF']
+	vcres.mpMaxLonF             = mapDict['mpMaxLonF']
+	vcres.mpMinLatF             = mapDict['mpMinLatF']
+	vcres.mpMaxLatF             = mapDict['mpMaxLatF']
+	vcres.mpGridLonSpacingF     = mapDict['mpGridLonSpacingF']
+	vcres.mpGridLatSpacingF     = mapDict['mpGridLatSpacingF']
 		
 	vcres.mpFillOn     = True 
 	igray = Ngl.new_color(wks,0.7,0.7,0.7)
