@@ -24,6 +24,7 @@ There are several collections of functions inside this module:
 Documentation in IPython notebook format located in doc folder, and also available through nbviewer:
 
   - [mitopen](http://nbviewer.ipython.org/urls/raw.github.com/koldunovn/komod/master/doc/mitopen.ipynb) 
+  - [mitplot](http://nbviewer.ipython.org/urls/raw.github.com/koldunovn/komod/master/doc/mitplot.ipynb)
 
 
 
