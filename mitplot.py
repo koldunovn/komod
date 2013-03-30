@@ -279,7 +279,9 @@ def arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None,\
 	""" Plot variable from array in the Arctic region.
 	
 	Usage:
-		arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None, showfig=True, psname="output", colormap_name='posneg_1', start_color=2, end_color=-2, vtitle="values"):
+		arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None,\
+		 showfig=True, psname="output", colormap_name='posneg_1', \
+		 start_color=2, end_color=-2, vtitle="values"):
 	
 	Input:
 		lon 		- 2D array of longitudes
@@ -307,7 +309,14 @@ def arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None,\
 		miss            - missing value
 		levon           - do we need to plot level value in header?
 		llevel          - data vector with values of levels (levon should be True)
-		region 		- one of predefined regions (Arctic(def), Global, NAtlantic)
+		add_cyclic      - add cyclic points
+		region 		- one of predefined regions (for list of regions see the reg function)
+		minLon      - if region="Global", you can select specific part of the globe 
+					  by specifying min/max lon/lat. Lons should be in 0-360 format, and
+					  plotting over 0 meredian is still a problem. 
+		maxLon
+		minLat
+		maxLat
 		
 	Output:
 		.ps file, output.ps by default
@@ -396,6 +405,8 @@ def arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None,\
 	
 	if miss is not None:
 		resources.sfMissingValueV = miss
+	elif hasattr(data, "fill_value"):
+		resources.sfMissingValueV = float(data.fill_value)
 	
 	
 	if data.shape.__len__() == 2:
@@ -468,10 +479,17 @@ def arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None,\
 	Ngl.delete_wks(wks)
 
 	
-def arctpltnc( data_file, variable_name, lon="lon", lat="lat", region = "Arctic", datamin=None, datamax=None, datastep=None, showfig=True, psname="output", colormap_name='testcmap', start_color=2, end_color=-2, timeon=True, raster_fill=False, add_cyclic=False, mpFill=True,levon=False,llevel="level",cnLevels=None, lbBoxFractions=None, sscale = 1):
+def arctpltnc( data_file, variable_name, lon="lon", lat="lat", \
+	region = "Arctic", datamin=None, datamax=None, datastep=None, \
+	showfig=True, psname="output", colormap_name='testcmap', start_color=2, \
+	end_color=-2, timeon=True, raster_fill=False, add_cyclic=False, mpFill=True,\
+	levon=False,llevel="level",cnLevels=None, lbBoxFractions=None, sscale = 1):
 	""" Plot variable from netCDF file in the Arctic region
 	Usage:
-		arctpl(data_file, variable_name, lon="lon", lat="lat", datamin=None, datamax=None, datastep=None, showfig=True, psname="output", colormap_name='testcmap', start_color=2, end_color=-2, timeon=True, raster_fill=False, add_cyclic=False, mpFill=True):
+		arctpl(data_file, variable_name, lon="lon", lat="lat", datamin=None, 
+			   datamax=None, datastep=None, showfig=True, psname="output", 
+			   colormap_name='testcmap', start_color=2, end_color=-2, 
+			   timeon=True, raster_fill=False, add_cyclic=False, mpFill=True):
 	
 	Input:
 		lon 		- 2D array of longitudes
@@ -736,8 +754,11 @@ def arctpltnc( data_file, variable_name, lon="lon", lat="lat", region = "Arctic"
 			os.system("gv "+psname+".ps")
 					
 					
-def globplt(lon, lat, data, datamin=None, datamax=None, datastep=None, showfig=True, psname="output", colormap_name='testcmap', start_color=2, end_color=-2, vtitle="values", raster_fill=False, miss=None,levon=False,llevel=None,  minLon=0, maxLon=360 , minLat=-80 , maxLat=85, mpFill=True):
-	""" Plot variable from array in the Arctic region
+def globplt(lon, lat, data, datamin=None, datamax=None, \
+	datastep=None, showfig=True, psname="output", colormap_name='testcmap',\
+	 start_color=2, end_color=-2, vtitle="values", raster_fill=False, \
+	 miss=None,levon=False,llevel=None,  minLon=0, maxLon=360 , minLat=-80 , maxLat=85, mpFill=True):
+	""" Plot variable from array in the Global region
 	
 	Usage:
 		arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None, showfig=True, psname="output", colormap_name='posneg_1', start_color=2, end_color=-2, vtitle="values"):
@@ -1117,14 +1138,15 @@ def globpltnc( data_file, variable_name, lon="lon", lat="lat", datamin=None, dat
 			os.system("gv "+psname+".ps")
 			
 			
-def pltgrd(lon,lat, arctic=False, minLon=0, maxLon=360 , minLat=-80 , maxLat=85, coastThick=4, add_cyclic=False):
+def pltgrd(lon,lat, region="Global",every=1, minLon=0, maxLon=360 , minLat=-80 , maxLat=85, coastThick=4, add_cyclic=False):
   """ Plot model grid from lat and lon arrays
   Usage:
 	pltgrd(lon,lat, arctic=False, minLon=0, maxLon=360 , minLat=-80 , maxLat=85, coastThick=4)
   Imput:
 	lon 		- longitude (ndarray)
 	lat 		- latitude (ndarray)
-	arctic		- if True we will plot predefined Arctic Region
+	region		- one of predefined regions (for list of regions see the reg function)
+	every 		- grid spacing (int)
 	minLon 		- minimum longitude
 	maxLon 		- maximum longitude
 	minLat 		- minimum latitude
@@ -1144,36 +1166,34 @@ def pltgrd(lon,lat, arctic=False, minLon=0, maxLon=360 , minLat=-80 , maxLat=85,
 
   resources = Ngl.Resources()
 
-  resources.sfXArray        = lon[:,:]
-  resources.sfYArray        = lat[:,:]
-  
-  if arctic == True:
-    resources.mpProjection          = "LambertEqualArea"
+  resources.sfXArray        = lon[::every,::every]
+  resources.sfYArray        = lat[::every,::every]
 
-    resources.mpDataBaseVersion     = "LowRes"
-    resources.mpGeophysicalLineThicknessF = coastThick
-    resources.mpLimitMode           = 'Corners'
-    resources.mpLeftCornerLatF      = 45
-    resources.mpLeftCornerLonF      = -41
-    resources.mpRightCornerLatF     = 48
-    resources.mpRightCornerLonF     = 138
-    resources.mpCenterLonF           = 0.
-    resources.mpCenterLatF           = 90.
-  else:
-    resources.mpProjection          = "CylindricalEquidistant"
-    resources.mpDataBaseVersion     = "LowRes"
-    resources.mpLimitMode           = "LatLon"
-    resources.mpMinLonF             = minLon
-    resources.mpMaxLonF             = maxLon
-    resources.mpMinLatF             = minLat
-    resources.mpMaxLatF             = maxLat
-    resources.mpGeophysicalLineThicknessF = coastThick
+  mapDict = reg(region, minLon, maxLon , minLat , maxLat)
+  
+  resources.mpProjection          = mapDict['mpProjection']
+		
+  resources.mpDataBaseVersion     = mapDict['mpDataBaseVersion']
+  resources.mpGeophysicalLineThicknessF = mapDict['mpGeophysicalLineThicknessF']
+  resources.mpLimitMode           = mapDict['mpLimitMode']
+  resources.mpLeftCornerLatF      = mapDict['mpLeftCornerLatF']
+  resources.mpLeftCornerLonF      = mapDict['mpLeftCornerLonF']
+  resources.mpRightCornerLatF     = mapDict['mpRightCornerLatF']
+  resources.mpRightCornerLonF     = mapDict['mpRightCornerLonF']
+  resources.mpCenterLonF          = mapDict['mpCenterLonF']
+  resources.mpCenterLatF          = mapDict['mpCenterLatF']
+  resources.mpMinLonF             = mapDict['mpMinLonF']
+  resources.mpMaxLonF             = mapDict['mpMaxLonF']
+  resources.mpMinLatF             = mapDict['mpMinLatF']
+  resources.mpMaxLatF             = mapDict['mpMaxLatF']
+  resources.mpGridLonSpacingF     = mapDict['mpGridLonSpacingF']
+  resources.mpGridLatSpacingF     = mapDict['mpGridLatSpacingF']
 	
-    resources.mpShapeMode    = 'FixedAspectFitBB'
-    resources.cnFillDotSizeF    = 1
+  resources.mpShapeMode    = 'FixedAspectFitBB'
+  resources.cnFillDotSizeF    = 1
 	
-    resources.mpCenterLonF           = 0.
-    resources.mpCenterLatF           = 0.
+  resources.mpCenterLonF           = 0.
+  resources.mpCenterLatF           = 0.
 
   resources.mpShapeMode    = 'FixedAspectFitBB'
 
@@ -1204,10 +1224,11 @@ def pltgrd(lon,lat, arctic=False, minLon=0, maxLon=360 , minLat=-80 , maxLat=85,
   resources.cnCellFillEdgeColor   = 1
   resources.cnCellFillMissingValEdgeColor   = 1
   
-  map = Ngl.contour_map(wks,(data[:,:]),resources)
+  map = Ngl.contour_map(wks,(data[::every,::every]),resources)
 
 
-def pltgrdnc(data_file, variable_name, lon="lon", lat="lat", every=1, coastThick=4, region="Global", minLon=0, maxLon=360 , minLat=-80 , maxLat=85, add_cyclic=False):
+def pltgrdnc(data_file, variable_name, lon="lon", lat="lat", every=1,\
+		     coastThick=4, region="Global", minLon=0, maxLon=360 , minLat=-80 , maxLat=85, add_cyclic=False):
   """ Plot model grid from netCDF file
   Usage:
 	arcgrd(data_file, variable_name, lon="lon", lat="lat", arctic=False, minLon=0, maxLon=360 , minLat=-80 , maxLat=85, add_cyclic=False):
@@ -1216,7 +1237,10 @@ def pltgrdnc(data_file, variable_name, lon="lon", lat="lat", every=1, coastThick
 	variable_name   - name of the variable in the data file
 	lon 		- longitude (name of the lon variable in netCDF file)
 	lat 		- latitude (name of the lat variable in netCDF file)
-	arctic		- if True we will plot predefined Arctic Region
+	lat 		- latitude (ndarray)
+	region		- one of predefined regions (for list of regions see the reg function)
+	every 		- grid spacing (int)
+	coastThick  - coast line thickness
 	minLon 		- minimum longitude
 	maxLon 		- maximum longitude
 	minLat 		- minimum latitude
@@ -1314,19 +1338,21 @@ def pltgrdnc(data_file, variable_name, lon="lon", lat="lat", every=1, coastThick
   map = Ngl.contour_map(wks,(data[::every,::every]),resources)
 
   
-def pltgrd_line(lon, lat, lon1, lat1, lon2, lat2, npoints=10, every=1, arctic=False, minLon=0, maxLon=360 , minLat=-80 , maxLat=85, psname="grid_line"):	
-  """ Plot model grid from lat and lon arrays and line defined by coordinates of the first and the last point
+def pltgrd_line(lon, lat, lon1, lat1, lon2, lat2, npoints=10, every=1, region="Global", minLon=0, maxLon=360 , minLat=-80 , maxLat=85, psname="grid_line"):	
+  """ Plot model grid from lat and lon arrays and line defined by coordinates of points defining the coordinates of the polyline
   Usage:
 	pltgrd_line(lon, lat, lon1, lat1, lon2, lat2, npoints=10, every=1, arctic=False, minLon=0, maxLon=360 , minLat=-80 , maxLat=85)
   Imput:
-	lon 		- longitude (ndarray)
-	lat 		- latitude (ndarray)
-	arctic		- if True we will plot predefined Arctic Region
+	lon 		- longitude ( 2d ndarray)
+	lat 		- latitude ( 2d ndarray)
+	region		- one of predefined regions (for list of regions see the reg function)
+	every 		- grid spacing (int)
+	npoints 	- number of points, that will be used to drow the line.
 	minLon 		- minimum longitude
 	maxLon 		- maximum longitude
 	minLat 		- minimum latitude
 	maxLat 		- maximum latitude
-  Output: grid.ps"""
+  Output: grid_line.ps"""
   plat, plon = Ngl.gc_interp(lat1, lon1, lat2, lon2, npoints)
   data = numpy.random.random(lon.shape)
 	
@@ -1344,29 +1370,25 @@ def pltgrd_line(lon, lat, lon1, lat1, lon2, lat2, npoints=10, every=1, arctic=Fa
   res.sfXArray        = lon[::every,::every]
   res.sfYArray        = lat[::every,::every]
 	
-  if arctic == True:
-    res.mpProjection          = "LambertEqualArea"
-
-    res.mpDataBaseVersion     = "LowRes"
-    res.mpGeophysicalLineThicknessF = 4
-    res.mpLimitMode           = 'Corners'
-    res.mpLeftCornerLatF      = 45
-    res.mpLeftCornerLonF      = -41
-    res.mpRightCornerLatF     = 48
-    res.mpRightCornerLonF     = 138
-    res.mpCenterLonF           = 0.
-    res.mpCenterLatF           = 90.
-  else:
-    res.mpProjection          = "CylindricalEquidistant"
-    res.mpDataBaseVersion     = "LowRes"
-    res.mpLimitMode           = "LatLon"
-    res.mpMinLonF             = minLon
-    res.mpMaxLonF             = maxLon
-    res.mpMinLatF             = minLat
-    res.mpMaxLatF             = maxLat
-	    	
-    res.mpCenterLonF           = 0.
-    res.mpCenterLatF           = 0.
+  mapDict = reg(region, minLon, maxLon , minLat , maxLat)
+  
+  res.mpProjection          = mapDict['mpProjection']
+		
+  res.mpDataBaseVersion     = mapDict['mpDataBaseVersion']
+  res.mpGeophysicalLineThicknessF = mapDict['mpGeophysicalLineThicknessF']
+  res.mpLimitMode           = mapDict['mpLimitMode']
+  res.mpLeftCornerLatF      = mapDict['mpLeftCornerLatF']
+  res.mpLeftCornerLonF      = mapDict['mpLeftCornerLonF']
+  res.mpRightCornerLatF     = mapDict['mpRightCornerLatF']
+  res.mpRightCornerLonF     = mapDict['mpRightCornerLonF']
+  res.mpCenterLonF          = mapDict['mpCenterLonF']
+  res.mpCenterLatF          = mapDict['mpCenterLatF']
+  res.mpMinLonF             = mapDict['mpMinLonF']
+  res.mpMaxLonF             = mapDict['mpMaxLonF']
+  res.mpMinLatF             = mapDict['mpMinLatF']
+  res.mpMaxLatF             = mapDict['mpMaxLatF']
+  res.mpGridLonSpacingF     = mapDict['mpGridLonSpacingF']
+  res.mpGridLatSpacingF     = mapDict['mpGridLatSpacingF']
 		
   res.mpShapeMode    = 'FixedAspectFitBB'
 	
@@ -1413,19 +1435,21 @@ def pltgrd_line(lon, lat, lon1, lat1, lon2, lat2, npoints=10, every=1, arctic=Fa
   return(plon, plat)
   #Ngl.end()
 
-def pltgrd_line2(lon, lat, plon, plat, every=1, arctic=False, minLon=0, maxLon=360 , minLat=-80 , maxLat=85):	
-  """ Plot model grid from lat and lon arrays and line defined by coordinates of the first and the last point
+def pltgrd_line2(lon, lat, plon, plat, every=1, region="Global", minLon=0, maxLon=360 , minLat=-80 , maxLat=85):	
+  """ Plot model grid from lat and lon arrays and line defined by points defining the coordinates of the polyline
   Usage:
 	pltgrd_line(lon, lat, lon1, lat1, lon2, lat2, npoints=10, every=1, arctic=False, minLon=0, maxLon=360 , minLat=-80 , maxLat=85)
   Imput:
 	lon 		- longitude (ndarray)
 	lat 		- latitude (ndarray)
-	arctic		- if True we will plot predefined Arctic Region
+	plon, plat  - 1-dimensional arrays defining the coordinates of the polyline
+	region		- one of predefined regions (for list of regions see the reg function)
+	every 		- grid spacing (int)
 	minLon 		- minimum longitude
 	maxLon 		- maximum longitude
 	minLat 		- minimum latitude
 	maxLat 		- maximum latitude
-  Output: grid.ps"""
+  Output: grid_line.ps"""
   #plat, plon = Ngl.gc_interp(lat1, lon1, lat2, lon2, npoints)
   data = numpy.random.random(lon.shape)
 	
@@ -1443,29 +1467,23 @@ def pltgrd_line2(lon, lat, plon, plat, every=1, arctic=False, minLon=0, maxLon=3
   res.sfXArray        = lon[::every,::every]
   res.sfYArray        = lat[::every,::every]
 	
-  if arctic == True:
-    res.mpProjection          = "LambertEqualArea"
-
-    res.mpDataBaseVersion     = "LowRes"
-    res.mpGeophysicalLineThicknessF = 4
-    res.mpLimitMode           = 'Corners'
-    res.mpLeftCornerLatF      = 45
-    res.mpLeftCornerLonF      = -41
-    res.mpRightCornerLatF     = 48
-    res.mpRightCornerLonF     = 138
-    res.mpCenterLonF           = 0.
-    res.mpCenterLatF           = 90.
-  else:
-    res.mpProjection          = "CylindricalEquidistant"
-    res.mpDataBaseVersion     = "LowRes"
-    res.mpLimitMode           = "LatLon"
-    res.mpMinLonF             = minLon
-    res.mpMaxLonF             = maxLon
-    res.mpMinLatF             = minLat
-    res.mpMaxLatF             = maxLat
-	    	
-    res.mpCenterLonF           = 0.
-    res.mpCenterLatF           = 0.
+  res.mpProjection          = mapDict['mpProjection']
+		
+  res.mpDataBaseVersion     = mapDict['mpDataBaseVersion']
+  res.mpGeophysicalLineThicknessF = mapDict['mpGeophysicalLineThicknessF']
+  res.mpLimitMode           = mapDict['mpLimitMode']
+  res.mpLeftCornerLatF      = mapDict['mpLeftCornerLatF']
+  res.mpLeftCornerLonF      = mapDict['mpLeftCornerLonF']
+  res.mpRightCornerLatF     = mapDict['mpRightCornerLatF']
+  res.mpRightCornerLonF     = mapDict['mpRightCornerLonF']
+  res.mpCenterLonF          = mapDict['mpCenterLonF']
+  res.mpCenterLatF          = mapDict['mpCenterLatF']
+  res.mpMinLonF             = mapDict['mpMinLonF']
+  res.mpMaxLonF             = mapDict['mpMaxLonF']
+  res.mpMinLatF             = mapDict['mpMinLatF']
+  res.mpMaxLatF             = mapDict['mpMaxLatF']
+  res.mpGridLonSpacingF     = mapDict['mpGridLonSpacingF']
+  res.mpGridLatSpacingF     = mapDict['mpGridLatSpacingF']
 		
   res.mpShapeMode    = 'FixedAspectFitBB'
 	
@@ -1509,8 +1527,32 @@ def pltgrd_line2(lon, lat, plon, plat, every=1, arctic=False, minLon=0, maxLon=3
 	
   #Ngl.end()
 
-def plt_transect(distances, levels, vvalues, start_color = 5, end_color = -2, datamin = -2., datamax = 2., datastep = 0.2, psname="output", miss=None, vpWidthF=0.6, vpHeightF=0.6, colormap_name="posneg_1",cnLinesOn = True,cnLineLabelsOn = True, showfig=False):
+def plt_transect(distances, levels, vvalues, start_color = 5, end_color = -2, \
+				 datamin = -2., datamax = 2., datastep = 0.2, psname="output",\
+				 miss=None, vpWidthF=0.6, vpHeightF=0.6, colormap_name="posneg_1",\
+				 cnLinesOn = True,cnLineLabelsOn = True, showfig=False):
 
+	""" Plot transect. Input data for this function can be calculated by the get_transect function.
+
+  	Input:
+  		distances		- x distances, 1D (x_kilometers from get_transect function)
+  		levels 			- depth of vertical levels, 1D
+  		vvalues			- data to be plotted, 2d (data_prof from get_transect function)
+  		start_color		- the index of the first color in the color table that should be used for a color contour or vector plot
+  		end_color 		- the index of the last color in the color table that should be used for a color contour or vector plot
+  		datamin 		- data minimum
+  		datamax 		- data maximum
+  		datastep 		- interval between contours
+  		psname 			- name of the output file
+	  	miss 			- missing values
+	  	vpWidthF		- specifies the width of View object's bounding box in NDC units. 
+  		vpHeightF		- specifies the height of View object's bounding box in NDC units
+  		colormap_name	- name of the colormap
+  		cnLinesOn 		- show contour lines
+  		cnLineLabelsOn  - show labels of the contour lines
+  		showfig 		- if True display the figure with gv
+
+    	Output: output.ps"""
 	wkres = Ngl.Resources()
 	wkres.wkColorMap = colormap(colormap_name)
 	wks_type = "ps"
@@ -1535,12 +1577,7 @@ def plt_transect(distances, levels, vvalues, start_color = 5, end_color = -2, da
 	
 	resources.cnLevelSelectionMode  = "ExplicitLevels" # Define own levels.
 	resources.cnLevels              = numpy.arange(datamin, datamax, datastep)
-	
-	
 			
-
-
-	
 	resources.sfXArray        = distances
 	resources.vpWidthF  = vpWidthF
 	resources.vpHeightF = vpHeightF
@@ -1550,11 +1587,13 @@ def plt_transect(distances, levels, vvalues, start_color = 5, end_color = -2, da
 	if showfig==True:
 		os.system("gv "+psname+".ps" )
 
-def plt_vectors(lon, lat, u_wind, v_wind, MinFracLengthF = 0.005, RefMagnitudeF = 0.3, RefLengthF = 0.05, LineArrowHeadMaxSizeF= 0.005, LineArrowHeadMinSizeF=0.005, RefAnnoString1 = 'vector', psname="output", sstep=1, region = 'Global', showfig=False, minLon=0, maxLon=360 , minLat=-80 , maxLat=85, vfMissingUValueV = None):
+def plt_vectors(lon, lat, u_wind, v_wind, MinFracLengthF = 0.005, \
+				RefMagnitudeF = 0.3, RefLengthF = 0.05, LineArrowHeadMaxSizeF= 0.005, \
+				LineArrowHeadMinSizeF=0.005, RefAnnoString1 = 'vector', \
+				psname="output", sstep=1, region = 'Global', showfig=False,\
+				 minLon=0, maxLon=360 , minLat=-80 , maxLat=85, vfMissingUValueV = None):
 	'''Plot vectors over map
-  Usage:
-	plt_vectors(lon, lat, u_wind, v_wind, MinFracLengthF = 0.005, RefMagnitudeF = 0.3, RefLengthF = 0.05, LineArrowHeadMaxSizeF= 0.005, LineArrowHeadMinSizeF=0.005, RefAnnoString1 = 'vector', psname="output", sstep=1, region = 'Global', minLon=0, maxLon=360 , minLat=-80 , maxLat=85)
-'''
+	'''
 	rlist            = Ngl.Resources()
 	rlist.wkColorMap = ["White","Black","Tan1","SkyBlue","Red"]
 	wks_type = "ps"
@@ -1632,7 +1671,7 @@ def plt_vectors(lon, lat, u_wind, v_wind, MinFracLengthF = 0.005, RefMagnitudeF 
 	
 	plot = Ngl.vector_map(wks,xxx_reshape,yyy_reshape,resources)
 	
-	Ngl.maximize_plot(wks,plot)    # Maximize size of plot in frame.
+#	Ngl.maximize_plot(wks,plot)    # Maximize size of plot in frame.
 	Ngl.draw(plot)
 	Ngl.frame(wks)
 	
