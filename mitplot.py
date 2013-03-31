@@ -127,8 +127,8 @@ def reg(region, minLon=0, maxLon=360 , minLat=-80 , maxLat=85):
 	elif region == 'Global':
 		
 		mapDict.update({"mpProjection":"CylindricalEquidistant"}) 
-		mapDict.update({"mpDataBaseVersion":"MediumRes"}) 
-		mapDict.update({"mpGeophysicalLineThicknessF": 4}) 
+		mapDict.update({"mpDataBaseVersion":"LowRes"}) 
+		mapDict.update({"mpGeophysicalLineThicknessF": 2}) 
 		mapDict.update({"mpLimitMode":"LatLon"}) 
 		mapDict.update({"mpLeftCornerLatF":0}) 
 		mapDict.update({"mpLeftCornerLonF":0}) 
@@ -384,9 +384,9 @@ def arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None,\
 	resources.lbTitleString             = vtitle
 	resources.lbTitleFontHeightF        = 0.022
 	resources.lbLabelFontHeightF        = 0.018
-	resources.lbTitleOffsetF            = -0.40
+	resources.lbTitleOffsetF            = -0.30
 	resources.lbBoxMinorExtentF         = 0.15
-	resources.pmLabelBarOrthogonalPosF  = -0.03
+	resources.pmLabelBarOrthogonalPosF  = -0.0
 	resources.lbOrientation             = "Horizontal"
 	
 	
@@ -603,9 +603,9 @@ def arctpltnc( data_file, variable_name, lon="lon", lat="lat", \
 	
 	resources.lbTitleFontHeightF        = 0.022
 	resources.lbLabelFontHeightF        = 0.018
-	resources.lbTitleOffsetF            = -0.40
+	resources.lbTitleOffsetF            = -0.30
 	resources.lbBoxMinorExtentF         = 0.15
-	resources.pmLabelBarOrthogonalPosF  = -0.06
+	resources.pmLabelBarOrthogonalPosF  = -0.0
 	resources.lbOrientation             = "Horizontal"
 	
 	if raster_fill==True:
@@ -660,12 +660,17 @@ def arctpltnc( data_file, variable_name, lon="lon", lat="lat", \
 		for ttime in range(data.shape[0]):
 			
 			if timeon==True:
-				ddate = num2date(ffile.variables["time"][ttime], ffile.variables["time"].units)
+				if 'Climatology' in ffile.variables["time"].description:
+					ddate_str = 'Climatology'
+				else:
+					ddate = num2date(ffile.variables["time"][ttime], ffile.variables["time"].units)
+					ddate_str = ddate.ctime()[4:]
+
 				if levon==True:
 					level_text = ffile.variables[llevel][ttime]
-					resources.tiMainString = ddate.ctime()[4:]+" Lev "+str(level_text)
+					resources.tiMainString = ddate_str+" Lev "+str(level_text)
 				else:
-					resources.tiMainString = ddate.ctime()[4:]
+					resources.tiMainString = ddate_str
 
 			data_plot = data[ttime,:,:]
 			
@@ -707,12 +712,17 @@ def arctpltnc( data_file, variable_name, lon="lon", lat="lat", \
 
 
 				if timeon==True:
-					ddate = num2date(ffile.variables["time"][ttime], ffile.variables["time"].units)
+					if 'Climatology' in ffile.variables["time"].description:
+						ddate_str = 'Climatology'
+					else:
+						ddate = num2date(ffile.variables["time"][ttime], ffile.variables["time"].units)
+						ddate_str = ddate.ctime()[4:]
+
 					if levon==True:
 						level_text = ffile.variables[llevel][llev]
-						resources.tiMainString = ddate.ctime()[4:]+" Lev "+str(level_text)
+						resources.tiMainString = ddate_str+" Lev "+str(level_text)
 					else:
-						resources.tiMainString = ddate.ctime()[4:]
+						resources.tiMainString = ddate_str
 					
 						 
 					
