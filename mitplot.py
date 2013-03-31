@@ -165,7 +165,24 @@ def reg(region, minLon=0, maxLon=360 , minLat=-80 , maxLat=85):
 		mapDict.update({"mpGridLonSpacingF":15})
 		mapDict.update({"mpGridLatSpacingF":5})
 		
-
+	elif region == 'NAtlanticOcean':
+		
+		mapDict.update({"mpProjection":"Mercator"}) 
+		mapDict.update({"mpDataBaseVersion":"MediumRes"}) 
+		mapDict.update({"mpGeophysicalLineThicknessF": 4}) 
+		mapDict.update({"mpLimitMode":"LatLon"}) 
+		mapDict.update({"mpLeftCornerLatF":-65}) 
+		mapDict.update({"mpLeftCornerLonF":-20}) 
+		mapDict.update({"mpRightCornerLatF":70}) 
+		mapDict.update({"mpRightCornerLonF":40}) 
+		mapDict.update({"mpCenterLonF":0.}) 
+		mapDict.update({"mpCenterLatF":0})
+		mapDict.update({"mpMinLonF":-100})
+		mapDict.update({"mpMaxLonF":20})
+		mapDict.update({"mpMinLatF":0})
+		mapDict.update({"mpMaxLatF":75})
+		mapDict.update({"mpGridLonSpacingF":15})
+		mapDict.update({"mpGridLatSpacingF":5})
 	
 	elif region == 'stanna':
 	  
@@ -321,6 +338,10 @@ def arctpl(lon, lat, data, datamin=None, datamax=None, datastep=None,\
 	Output:
 		.ps file, output.ps by default
 	"""
+
+	if lon.shape.__len__() == 1:
+	  lon,lat = numpy.meshgrid(lon,lat)
+	
 	if add_cyclic==True:
 	  lon = Ngl.add_cyclic(lon)
 	  lat = Ngl.add_cyclic(lat)
