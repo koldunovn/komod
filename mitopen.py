@@ -212,7 +212,9 @@ def phcascii(filename, xdim, ydim,  nlines, nwords=10, lword=8,  zdim=1):
 	return data
 
 
-def nc2d(parameters=['adxx_atemp'], ofile='adxx', iteration='0', bswap=1, sstart_date = "seconds since 2002-10-01 07:00", deltaT=1200, xx_period=240000.0, FillValue=-1.0e+23, meta=None, dump='no'):
+def nc2d(parameters=['adxx_atemp'], ofile='adxx', iteration='0', bswap=1,
+         sstart_date = "seconds since 2002-10-01 07:00", deltaT=1200, 
+         xx_period=240000.0, FillValue=-1.0e+23, meta=None, dump='no'):
 	'''
 	Convert 2d fields from adxx* and xx* fles to netCDF format with use of Nio module.
 	In order to convert variables (like T, S, AREA) use var_nc2d.  

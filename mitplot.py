@@ -1840,7 +1840,14 @@ def plt_vectors_scalars(lon, lat, u_wind, v_wind, scalar_data, datamin = -2., da
 	if showfig==True:
 		os.system("gv "+psname+".ps")
 
-def plt_vectors_colors(lon, lat, u_wind, v_wind, scalar_data, datamin = -2., datamax = 2., datastep = 0.2, vfMissingUValueV = None, sfMissingValueV = None, MinFracLengthF = 0.005, RefMagnitudeF = 0.3, RefLengthF = 0.05, LineArrowHeadMaxSizeF= 0.005, LineArrowHeadMinSizeF=0.005, RefAnnoString1 = 'vector', psname="output", sstep=1, region = 'Global', showfig=False, TitleString = 'variable', minLon=0, maxLon=360 , minLat=-80 , maxLat=85, colormap_name='posneg_1',timeon=False,levon=False, level=None, timstep=None, tunits=None, vcLineArrowThicknessF=1, overfigure=True):
+def plt_vectors_colors(lon, lat, u_wind, v_wind, scalar_data, 
+	datamin = -2., datamax = 2., datastep = 0.2, vfMissingUValueV = None, 
+	sfMissingValueV = None, MinFracLengthF = 0.005, RefMagnitudeF = 0.3, 
+	RefLengthF = 0.05, LineArrowHeadMaxSizeF= 0.005, LineArrowHeadMinSizeF=0.005, 
+	RefAnnoString1 = 'vector', psname="output", sstep=1, region = 'Global', 
+	showfig=False, TitleString = 'variable', minLon=0, maxLon=360 , minLat=-80 , maxLat=85, 
+	colormap_name='posneg_1',timeon=False,levon=False, level=None, timstep=None, tunits=None, 
+	vcLineArrowThicknessF=1, overfigure=True):
 	'''Plot vectors and scalar value over map
   Usage:
 	plt_vectors(lon, lat, u_wind, v_wind, MinFracLengthF = 0.005, RefMagnitudeF = 0.3, RefLengthF = 0.05, LineArrowHeadMaxSizeF= 0.005, LineArrowHeadMinSizeF=0.005, RefAnnoString1 = 'vector', psname="output", sstep=1, region = 'Global', minLon=0, maxLon=360 , minLat=-80 , maxLat=85)'''
