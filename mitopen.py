@@ -13,7 +13,7 @@ var_nc2d	 - Convert 2d fields produced by MITgcm to netCDF format with use of Ni
 nc3d		 - Convert 3d fields from adxx* and xx* fles to netCDF format with use of Nio module.
 var_nc3d	 - Convert 2d fields produced by MITgcm to netCDF format with use of Nio module. 
 gatrib 		 - Return attrubutes for known variables.
-ncep2bin     - Converts NCEP reanalysis data from netCDF to binary
+ncep2bin	 - Converts NCEP reanalysis data from netCDF to binary
 
 Copyright (C) 2010 - 2014 Nikolay Koldunov <koldunovn@gmail.com> 
 
@@ -748,7 +748,7 @@ def gatrib(parname):
 
 
 
-def ncep2bin(ifile, variable, bswap=1):
+def ncep2bin(ifile, variable, bswap=1, coef=1.):
     '''Converts NCEP reanalysis data from netCDF file
     to binary file.
 
@@ -756,11 +756,13 @@ def ncep2bin(ifile, variable, bswap=1):
     ifile - input file
     variable - name of the variable from the netCDF file
     bswap - do we need swipe bytes or not 
+    coef - data will be multiplied by this coefficient
+           (in case of prate we have to mult by 0.001)
 
     '''
     f = Dataset(ifile)
     #here ::-1 is for fliping data up side down.
-    a = f.variables[variable][:,::-1,:]
+    a = f.variables[variable][:,::-1,:]*coef
     if bswap==1:
         a = a.byteswap()
     a.tofile(ifile[:-2]+'bin')
