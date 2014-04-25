@@ -21,8 +21,16 @@ Copyright (C) 2010 - 2013 Nikolay Koldunov <koldunovn@gmail.com>
 """
 
 # -------------------------------------------------
-import Ngl
-import Nio
+try:
+	import Ngl
+except ImportError:
+	print('Ngl is not avalible, some functions will not work')
+
+try:
+	import Nio
+except ImportError:
+	print('Nio is not avalible, some functions will not work')
+
 import numpy
 import os
 from netcdftime import num2date

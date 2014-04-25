@@ -18,7 +18,10 @@ Nikolay Koldunov 18 May 2010
 import os
 import matplotlib.pyplot as plt
 import numpy
-import Ngl
+try:
+	import Ngl
+except ImportError:
+	print('Ngl is not avalible, some functions will not work')
 
 
 def pssplit(filename, npages):

@@ -23,7 +23,10 @@ Copyright (C) 2010 - 2014 Nikolay Koldunov <koldunovn@gmail.com>
 
 import numpy
 import os
-import Nio
+try:
+	import Nio
+except ImportError:
+	print('Nio is not avalible, some functions will not work')
 import glob
 from netCDF4 import Dataset
 
