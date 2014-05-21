@@ -765,7 +765,12 @@ def ncep2bin(ifile, variable, bswap=1, coef=1.):
     '''
     f = Dataset(ifile)
     #here ::-1 is for fliping data up side down.
-    a = f.variables[variable][:,::-1,:]*coef
+    if coef != 1.:
+    	a = np.float64(f.variables[variable][:,::-1,:])*coef
+    	a = np.float32(a)
+    else:
+    	a = f.variables[variable][:,::-1,:]*coef
+    
     if bswap==1:
         a = a.byteswap()
     a.tofile(ifile[:-2]+'bin')
