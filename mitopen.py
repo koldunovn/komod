@@ -164,7 +164,7 @@ def mitbin2(filename, bswap=1, meta=None):
 	if meta == None:
 		ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber = rmeta(filename[:-4]+"meta")
 	elif meta == 'xx':
-		ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber = rmeta(filename[2:-4]+"meta")
+		ndim, xdim, ydim, zdim, datatype, nrecords, timeStepNumber = rmeta(filename[:-26]+filename[-24:-4]+"meta")
 	
 	size = nrecords*zdim*xdim*ydim
 	shape = (nrecords,zdim,xdim,ydim)
