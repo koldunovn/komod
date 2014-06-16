@@ -26,7 +26,8 @@ import os
 try:
 	import Nio
 except ImportError:
-	print('Nio is not avalible, some functions will not work')
+	pass
+	#print('Nio is not avalible, some functions will not work')
 import glob
 from netCDF4 import Dataset
 

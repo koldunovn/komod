@@ -21,7 +21,8 @@ import numpy
 try:
 	import Ngl
 except ImportError:
-	print('Ngl is not avalible, some functions will not work')
+	pass
+	#print('Ngl is not avalible, some functions will not work')
 
 
 def pssplit(filename, npages):
