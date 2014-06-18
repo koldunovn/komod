@@ -468,3 +468,60 @@ def get_transect(lat, lon, data, lat1, lon1, lat2, lon2, npoints = 10, pdif = 1,
 	print(n_grid)
 	
 	return(data_prof, x_kilometers, m_grid, n_grid )
+	
+def get_cost(cost_list, cost_var):
+    ''' Get cost value from costfunction???? files
+    
+    Input:
+    cost_list - list of lines from costfunction???? file
+    cost_var  - name of the variable
+    
+    Output:
+    value of cost_var
+    
+    '''
+    for line in cost_list:
+        if line.startswith(cost_var):
+            nn = float(line.split()[2].replace('D','E'))
+            return nn
+
+def get_2cost(modelYear, cost_var, iterations=[0,1], pathToCost='./CPCOST/'):
+    '''For specific variable gets cost values from costfinction files
+    and compare them (difference in %)
+    
+    Input:
+    
+    modelYear  - year of interest
+    cost_var   - name of the variable
+    iterations - list with numbers of iterations
+    pathToCost - path to files with costfunction files, organised in YYYY/itX/ way
+    
+    Output:
+    
+    cost values for two variables and theit difference in %
+    
+    '''
+    
+    if cost_var in ['f_smrarea', 'f_smrsst', 'f_smrsss']:
+        cost_var = ' '+cost_var
+    
+        f1 = open(pathToCost+"/"+str(modelYear)+'/costfunction_seaice000'+str(iterations[0]), 'r')
+        f2 = open(pathToCost+"/"+str(modelYear)+'/costfunction_seaice000'+str(iterations[1]), 'r')
+        
+    else:
+        f1 = open(pathToCost+"/"+str(modelYear)+'/costfunction000'+str(iterations[0]), 'r')
+        f2 = open(pathToCost+"/"+str(modelYear)+'/costfunction000'+str(iterations[1]), 'r')
+    
+
+    f1d = f1.read().splitlines()
+    f2d = f2.read().splitlines()
+    
+    val1 = get_cost(f1d, cost_var)
+    val2 = get_cost(f2d, cost_var)
+    
+    if val1 != 0:
+        perc = 100 - ((val2/(val1))*100)
+    else:
+        perc=0
+    
+    return val1, val2, perc
