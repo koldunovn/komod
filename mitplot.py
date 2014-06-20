@@ -1980,4 +1980,44 @@ def plot(data, data2=None, xvalues = None, xvalues2=None):
 	else:
 		plt.plot(xvalues,data)	
 	plt.show()
+
+def plt_adxx_stat(varname,adxxdata,mmask):
 	
+    '''
+    plot min max and mean of adxx fields.
+    Input:
+        varname  = name of the variable (e.g. "atemp"), string 
+        adxxdata = 4D array with data
+        mmask    = land sea mask 
+
+    '''
+    
+    plt.subplot(2,3,1)
+    plt.imshow(numpy.flipud(adxxdata.max(axis=0)[0,:,:]*mmask))
+    plt.colorbar(orientation='horizontal')
+    plt.title('adxx_'+varname+' max')
+        
+        
+    plt.subplot(2,3,2)
+    plt.imshow(numpy.flipud(adxxdata.min(axis=0)[0,:,:]*mmask))
+    plt.colorbar(orientation='horizontal')
+    plt.title('adxx_'+varname+' min')
+        
+        
+    plt.subplot(2,3,3)
+    plt.imshow(numpy.flipud(adxxdata.mean(axis=0)[0,:,:]*mmask))
+    plt.colorbar(orientation='horizontal')
+    plt.title('adxx_'+varname+' mean')
+       
+        
+    plt.subplot(2,3,4)
+    plt.plot(adxxdata.max(axis=2).max(axis=2))
+        
+    plt.subplot(2,3,5)
+    plt.plot(adxxdata.min(axis=2).min(axis=2))
+        
+    plt.subplot(2,3,6)
+    plt.plot(adxxdata.mean(axis=2).mean(axis=2))
+        
+    plt.tight_layout()
+    plt.show
