@@ -23,7 +23,7 @@ try:
 except ImportError:
 	pass
 	#print('Ngl is not avalible, some functions will not work')
-
+import smtplib
 
 def pssplit(filename, npages):
 	"""split multipage .ps file in to one-page files.
@@ -525,3 +525,20 @@ def get_2cost(modelYear, cost_var, iterations=[0,1], pathToCost='./CPCOST/'):
         perc=0
     
     return val1, val2, perc
+ 
+def sendemail(from_addr, to_addr_list, cc_addr_list,
+              subject, message,
+              login, password,
+              smtpserver='smtp.gmail.com:587'):
+    header  = 'From: %s\n' % from_addr
+    header += 'To: %s\n' % ','.join(to_addr_list)
+    header += 'Cc: %s\n' % ','.join(cc_addr_list)
+    header += 'Subject: %s\n\n' % subject
+    message = header + message
+ 
+    server = smtplib.SMTP(smtpserver)
+    server.starttls()
+    server.login(login,password)
+    problems = server.sendmail(from_addr, to_addr_list, message)
+    server.quit()
+  
