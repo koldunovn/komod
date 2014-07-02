@@ -541,4 +541,55 @@ def sendemail(from_addr, to_addr_list, cc_addr_list,
     server.login(login,password)
     problems = server.sendmail(from_addr, to_addr_list, message)
     server.quit()
-  
+
+def calc_area(data, area_size, lat=None, blat=None):
+    ''' Calculates sea ice area
+    
+    Input:
+    
+    data      - 2d field with AREA values
+    area_size - usually dxc*dyc
+    lat       - 2d array of latitudes
+    blat      - boundary latitude (southern border)
+    
+    Output:
+    
+    sea ice area in m^2
+    '''
+
+    if blat != None:
+        ii, jj = np.where((lat<blat))
+        data[ii,jj] = 0.
+        
+    data[:,:][data[:,:]<0.15]=0.
+    data_masked      = np.ma.masked_equal(data[:,:], 0)
+    data_masked_mult = data_masked.astype('float64')*area_size.astype('float64')
+        
+    return np.ma.sum(data_masked_mult)
+
+def calc_extent(data, area_size, lat=None, blat=None):
+    ''' Calculates sea ice area
+    
+    Input:
+    
+    data      - 2d field with AREA values
+    area_size - usually dxc*dyc
+    lat       - 2d array of latitudes
+    blat      - boundary latitude (southern border)
+    
+    Output:
+    
+    sea ice extent in m^2
+    '''
+
+    if blat != None:
+        ii, jj = np.where((lat<blat))
+        data[ii,jj] = 0.
+        
+    data[:,:][data[:,:]<0.15]=0.
+    data[:,:][data[:,:]>=0.15]=1.
+    data_masked      = np.ma.masked_equal(data[:,:], 0)
+    data_masked_mult = data_masked.astype('float64')*area_size.astype('float64')
+    
+    return np.ma.sum(data_masked_mult)  
+    
