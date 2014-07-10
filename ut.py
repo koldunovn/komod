@@ -18,12 +18,20 @@ Nikolay Koldunov 18 May 2010
 import os
 import matplotlib.pyplot as plt
 import numpy
+np = numpy
 try:
 	import Ngl
 except ImportError:
 	pass
 	#print('Ngl is not avalible, some functions will not work')
 import smtplib
+
+try:
+	import pandas as pd
+except ImportError:
+	pass
+import glob
+from netCDF4 import Dataset, MFDataset
 
 def pssplit(filename, npages):
 	"""split multipage .ps file in to one-page files.
@@ -592,4 +600,109 @@ def calc_extent(data, area_size, lat=None, blat=None):
     data_masked_mult = data_masked.astype('float64')*area_size.astype('float64')
     
     return np.ma.sum(data_masked_mult)  
+
+def ice_comp_model_to_osi(pathToModel, modelYear, modelIteration, boundLat, pathToOSI, param = 'area'):
+    '''
+    Plot sea ice area from satellite data and several model iterations
+    '''
+    fsat = MFDataset(pathToOSI+'/OSI'+modelYear+'??.nc')
+    osi_lat = fsat.variables['lat'][:]
+    osi_lon = fsat.variables['lon'][:]
+
+    osi_ice = fsat.variables['ice_conc'][0,:,:]
+    area_osi = np.ones(osi_ice.shape)*100
+
+    osi_area = []
+    for mm in range(12):
+        if param == 'area':
+            osi_area.append(calc_area(fsat.variables['ice_conc'][mm,:,:]/100,\
+                                      area_osi, osi_lat, blat=boundLat)/1e6)
+        elif param == 'extent':
+        	osi_area.append(calc_extent(fsat.variables['ice_conc'][mm,:,:]/100,\
+        	                area_osi, osi_lat, blat=boundLat)/1e6)
+        
+    
+    g  = Dataset('/scratch/local1/POL06/1_test/grid.cdf')
+    dxc = g.variables['dxc'][0,:,:]
+    dyc = g.variables['dyc'][0,:,:]
+    lat = g.variables['yc'][0,:,:]
+    dxcXdyc = dxc*dyc
+
+    area_model=np.zeros((len(modelIteration), 12))
+
+    for (it, iteration) in enumerate(modelIteration):
+        fm = MFDataset(pathToModel+'/'+modelYear+'/'+'it'+str(iteration)+'/fw/*.cdf')
+        for mm in range(12):
+        	if param == 'area':
+        	    area_model[it,mm] = calc_area(fm.variables['area'][mm,:,:],\
+        	    	                          dxcXdyc, lat, blat=boundLat)/10e11
+        	elif param == 'extent':
+        		area_model[it,mm] = calc_extent(fm.variables['area'][mm,:,:],\
+        			                          dxcXdyc, lat, blat=boundLat)/10e11
+    
+        fm.close()
+    
+    dates = pd.date_range(modelYear+'-01', str(int(modelYear)+1)+'-01', freq='M')
+    dd = pd.DataFrame(index=dates)
+
+    dd['Satellite']=osi_area
+
+    for (it , iteration) in enumerate(modelIteration):
+        dd['it'+str(iteration)]=area_model[it,:]
+
+    return dd.plot(figsize=(10,5))
+
+
+def ice_comp_model_to_osi_table(pathToModel, modelYears, modelIteration, boundLat, pathToOSI, param = 'area'):
+
+    diff_array = numpy.zeros((len(modelYears), 12))
+
+    for (nnum, yyear) in enumerate(modelYears):
+    
+        fsat = MFDataset(pathToOSI+'/OSI'+yyear+'??.nc')
+        osi_lat = fsat.variables['lat'][:]
+        osi_lon = fsat.variables['lon'][:]
+
+        osi_ice = fsat.variables['ice_conc'][0,:,:]
+        area_osi = np.ones(osi_ice.shape)*100
+
+        osi_area = []
+        for mm in range(12):
+            if param == 'area':
+                osi_area.append(calc_area(fsat.variables['ice_conc'][mm,:,:]/100,\
+                                      area_osi, osi_lat, blat=boundLat)/1e6)
+            elif param == 'extent':
+                osi_area.append(calc_extent(fsat.variables['ice_conc'][mm,:,:]/100,\
+                            area_osi, osi_lat, blat=boundLat)/1e6)
+        
+    
+        g  = Dataset('/scratch/local1/POL06/1_test/grid.cdf')
+        dxc = g.variables['dxc'][0,:,:]
+        dyc = g.variables['dyc'][0,:,:]
+        lat = g.variables['yc'][0,:,:]
+        dxcXdyc = dxc*dyc
+
+        area_model=np.zeros((len(modelIteration), 12))
+    
+        if modelIteration[0] == 'last':
+            gg = glob.glob(pathToModel+'/'+yyear+'/'+'it*')
+            gg.sort()
+            lastit = [int(gg[-1].split('/')[-1].split('t')[-1])]
+        else:
+            lastit = modelIteration
+
+        for (it, iteration) in enumerate(lastit):
+            fm = MFDataset(pathToModel+'/'+yyear+'/'+'it'+str(iteration)+'/fw/*.cdf')
+            for mm in range(12):
+                if param == 'area':
+                    area_model[it,mm] = calc_area(fm.variables['area'][mm,:,:],\
+        	    	                          dxcXdyc, lat, blat=boundLat)/10e11
+                elif param == 'extent':
+                    area_model[it,mm] = calc_extent(fm.variables['area'][mm,:,:],\
+        			                          dxcXdyc, lat, blat=boundLat)/10e11
+    
+            fm.close()
+        diff_array[nnum,:] = area_model[0,:]-osi_area[:]
+    return diff_array
+
     
