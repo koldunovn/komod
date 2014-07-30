@@ -4,8 +4,8 @@
 
 """Komod module with different small utilits that makes life easier
  
-pssplit 	- split multipage .ps file in to one-page files.
-pssplit2eps	- split multipage .ps file in to one-page files and then convert them to eps
+pssplit     - split multipage .ps file in to one-page files.
+pssplit2eps - split multipage .ps file in to one-page files and then convert them to eps
 mshow           - show 2d matrix
 epspair         - create .pdf file with images arranged in two columns
 pointfind       - find grid point that is closest to some lat/lon point 
@@ -20,300 +20,300 @@ import matplotlib.pyplot as plt
 import numpy
 np = numpy
 try:
-	import Ngl
+    import Ngl
 except ImportError:
-	pass
-	#print('Ngl is not avalible, some functions will not work')
+    pass
+    #print('Ngl is not avalible, some functions will not work')
 import smtplib
 
 try:
-	import pandas as pd
+    import pandas as pd
 except ImportError:
-	pass
+    pass
 import glob
 from netCDF4 import Dataset, MFDataset
 
 def pssplit(filename, npages):
-	"""split multipage .ps file in to one-page files.
-	It use unix psselect utilite
-	    
-	   Usage: pssplit(filename, npages)
+    """split multipage .ps file in to one-page files.
+    It use unix psselect utilite
+        
+       Usage: pssplit(filename, npages)
 
     Input:
-	filename    - file name
-	npages      - number of pages
+    filename    - file name
+    npages      - number of pages
 
     Output:
         one-page ps files 
 
     """
-	for page in range(npages):
-		os.system("psselect -p"+str(page)+" "+filename+" "+filename[:-3]+"_"+str(page).zfill(3)+".ps") 
-		
+    for page in range(npages):
+        os.system("psselect -p"+str(page)+" "+filename+" "+filename[:-3]+"_"+str(page).zfill(3)+".ps") 
+        
 
 def pssplit2eps(filename, npages):
-	"""split multipage .ps file in to one-page files and then convert them to eps 
-	It use unix psselect and ps2eps (http://www.tm.uka.de/~bless/ps2eps) utilites
-	    
-	   Usage: pssplit2eps(filename, npages)
+    """split multipage .ps file in to one-page files and then convert them to eps 
+    It use unix psselect and ps2eps (http://www.tm.uka.de/~bless/ps2eps) utilites
+        
+       Usage: pssplit2eps(filename, npages)
 
     Input:
-	filename    - file name
-	npages      - number of pages
+    filename    - file name
+    npages      - number of pages
 
     Output:
         one-page eps files 
 
     """
-	for page in range(npages):
-		os.system("psselect -p"+str(page)+" "+filename+" "+filename[:-3]+"_"+str(page).zfill(3)+".ps") 
-		os.system("ps2eps -f "+filename[:-3]+"_"+str(page).zfill(3)+".ps")
-		os.system("rm "+filename[:-3]+"_"+str(page).zfill(3)+".ps")
+    for page in range(npages):
+        os.system("psselect -p"+str(page)+" "+filename+" "+filename[:-3]+"_"+str(page).zfill(3)+".ps") 
+        os.system("ps2eps -f "+filename[:-3]+"_"+str(page).zfill(3)+".ps")
+        os.system("rm "+filename[:-3]+"_"+str(page).zfill(3)+".ps")
 
 
 def mshow(matrix, cmap=None, norm=None, aspect=None, interpolation=None,
        alpha=1.0, vmin=None, vmax=None, origin=None, extent=None):
-	""" show 2d matrix
-	this is just pyplot.imshow that displays figure imidiately and with color bar
-	Usage: 
-		mshow(matrix,cmap=None, norm=None, aspect=None, interpolation=None,
-       			   alpha=1.0, vmin=None, vmax=None, origin=None, extent=None)
-	Input:
-		matrix - 2d matrix
-	   	description of other options can be found at: http://matplotlib.sourceforge.net/api/pyplot_api.html#matplotlib.pyplot.imshow
-	Output:
-		2D plot of matrix values
-	"""
-	plt.imshow(matrix,cmap=cmap, norm=norm, aspect=aspect, interpolation=interpolation,
+    """ show 2d matrix
+    this is just pyplot.imshow that displays figure imidiately and with color bar
+    Usage: 
+        mshow(matrix,cmap=None, norm=None, aspect=None, interpolation=None,
+                   alpha=1.0, vmin=None, vmax=None, origin=None, extent=None)
+    Input:
+        matrix - 2d matrix
+        description of other options can be found at: http://matplotlib.sourceforge.net/api/pyplot_api.html#matplotlib.pyplot.imshow
+    Output:
+        2D plot of matrix values
+    """
+    plt.imshow(matrix,cmap=cmap, norm=norm, aspect=aspect, interpolation=interpolation,
        alpha=1.0, vmin=vmin, vmax=vmax, origin=origin, extent=extent)
-	plt.colorbar()
-	plt.show()
+    plt.colorbar()
+    plt.show()
 
 def eps2(filename1, filename2, npair, ofname="output",nstart=0, showfig=True):
-	""" create .pdf file with images arranged in two columns 
-	    (useful, for example, when you want to compare output of two different runs)
-	Dependencies:
-		python.sty	- have to be in your working directory or Latex path.
-				  Can be obtained from here http://www.imada.sdu.dk/~ehmsen/python.sty
-		latex, dvipdf, gv
-	Usage: 
-		epspair(filename1, filename2, npair, ofname="output",nstart=0,)
-	Input:
-		filename1	- constant part of .eps files
-				  that will be displayed in the left column.
-				  The rest of the name should be 3 char digit with zeros in front and .eps extension
-				  E.g. my_file_007.eps (here filename1="my_file_"), run1_040.eps, model1_900.eps 
-				  This files can be generated by komod.pssplit or komod.pssplit2eps
-				  
-		filename2	- the same as filename1, but for images of the right column.
-		npair 		- number of pairs (rows in out two column table)
-		ofname		- output file name, default = "output"
-		nstart		- first number we will start with
-		showfig		- if True display the figure with gv
-	Output:
-		ofname.pdf file with images arranged in two columns
-		
-		
-	
-	"""
+    """ create .pdf file with images arranged in two columns 
+        (useful, for example, when you want to compare output of two different runs)
+    Dependencies:
+        python.sty  - have to be in your working directory or Latex path.
+                  Can be obtained from here http://www.imada.sdu.dk/~ehmsen/python.sty
+        latex, dvipdf, gv
+    Usage: 
+        epspair(filename1, filename2, npair, ofname="output",nstart=0,)
+    Input:
+        filename1   - constant part of .eps files
+                  that will be displayed in the left column.
+                  The rest of the name should be 3 char digit with zeros in front and .eps extension
+                  E.g. my_file_007.eps (here filename1="my_file_"), run1_040.eps, model1_900.eps 
+                  This files can be generated by komod.pssplit or komod.pssplit2eps
+                  
+        filename2   - the same as filename1, but for images of the right column.
+        npair       - number of pairs (rows in out two column table)
+        ofname      - output file name, default = "output"
+        nstart      - first number we will start with
+        showfig     - if True display the figure with gv
+    Output:
+        ofname.pdf file with images arranged in two columns
+        
+        
+    
+    """
 
-	ofnametex = ofname+".tex"
-		
-	f = open(ofnametex, 'w')
-	
-	
-	f.write('''\documentclass   {article}
-	\usepackage{python}
-	\usepackage{graphicx}
-	\usepackage[top=1cm, bottom=1cm, left=1cm, right=2cm]{geometry}
-	\\begin{document}
-	
-	\\begin{python}
-	for i in range('''+str(nstart)+''', '''+str(npair)+'''):
-	
-	    print r'\\begin{center}'
-	    print r'\parbox{0.40\linewidth}{\includegraphics[width=4.5cm, angle=0]{'''+filename1+''''+str(i).zfill(3)+'.eps}\\\\'
-	    print r' \centering  }'
-	    print r'\hspace{0.1\linewidth}'
-	    print r'\parbox{0.40\linewidth}{\includegraphics[width=4.5cm, angle=0]{'''+filename2+''''+str(i).zfill(3)+'.eps}\\\\'
-	    print r'\centering }'
-	
-	    print r'\end{center}'
-	
-	
-	
-	\end{python}
-	
-	\end{document}
-	
-	''')
-	
-	f.close()
-	
-	os.system("latex --shell-escape "+ofnametex)
-	os.system("dvipdf "+ofnametex[:-3]+"dvi")
-	if showfig==True:
-		os.system("gv "+ofnametex[:-3]+"pdf")
-		
+    ofnametex = ofname+".tex"
+        
+    f = open(ofnametex, 'w')
+    
+    
+    f.write('''\documentclass   {article}
+    \usepackage{python}
+    \usepackage{graphicx}
+    \usepackage[top=1cm, bottom=1cm, left=1cm, right=2cm]{geometry}
+    \\begin{document}
+    
+    \\begin{python}
+    for i in range('''+str(nstart)+''', '''+str(npair)+'''):
+    
+        print r'\\begin{center}'
+        print r'\parbox{0.40\linewidth}{\includegraphics[width=4.5cm, angle=0]{'''+filename1+''''+str(i).zfill(3)+'.eps}\\\\'
+        print r' \centering  }'
+        print r'\hspace{0.1\linewidth}'
+        print r'\parbox{0.40\linewidth}{\includegraphics[width=4.5cm, angle=0]{'''+filename2+''''+str(i).zfill(3)+'.eps}\\\\'
+        print r'\centering }'
+    
+        print r'\end{center}'
+    
+    
+    
+    \end{python}
+    
+    \end{document}
+    
+    ''')
+    
+    f.close()
+    
+    os.system("latex --shell-escape "+ofnametex)
+    os.system("dvipdf "+ofnametex[:-3]+"dvi")
+    if showfig==True:
+        os.system("gv "+ofnametex[:-3]+"pdf")
+        
 
 def eps4(filename1, filename2, filename3, filename4, nquad, ofname="output",nstart=0, showfig=True):
-	""" create .pdf file with images arranged in 4 columns 
-	    (useful, for example, when you want to compare output of 4 different runs)
-	Dependencies:
-		python.sty	- have to be in your working directory or Latex path.
-				  Can be obtained from here http://www.imada.sdu.dk/~ehmsen/python.sty
-		latex, dvipdf, gv
-	Usage: 
-		epsquad(filename1, filename2, filename3, filename4, npair, ofname="output",nstart=0,)
-	Input:
-		filename1	- constant part of .eps files
-				  that will be displayed in the left (1st) column.
-				  The rest of the name should be 3 char digit with zeros in front and .eps extension
-				  E.g. my_file_007.eps (here filename1="my_file_"), run1_040.eps, model1_900.eps 
-				  This files can be generated by komod.pssplit or komod.pssplit2eps
-				  
-		filename2	- the same as filename1, but for images of the 2nd column.
-		filename3	- the same as filename1, but for images of the 3rd column.
-		filename4	- the same as filename1, but for images of the 4th column.
-		nquad 		- number of quads (rows in the 4 column table)
-		ofname		- output file name, default = "output"
-		nstart		- first number we will start with
-		showfig		- if True display the figure with gv
-	Output:
-		ofname.pdf file with images arranged in two columns
-		
-		
-	
-	"""
+    """ create .pdf file with images arranged in 4 columns 
+        (useful, for example, when you want to compare output of 4 different runs)
+    Dependencies:
+        python.sty  - have to be in your working directory or Latex path.
+                  Can be obtained from here http://www.imada.sdu.dk/~ehmsen/python.sty
+        latex, dvipdf, gv
+    Usage: 
+        epsquad(filename1, filename2, filename3, filename4, npair, ofname="output",nstart=0,)
+    Input:
+        filename1   - constant part of .eps files
+                  that will be displayed in the left (1st) column.
+                  The rest of the name should be 3 char digit with zeros in front and .eps extension
+                  E.g. my_file_007.eps (here filename1="my_file_"), run1_040.eps, model1_900.eps 
+                  This files can be generated by komod.pssplit or komod.pssplit2eps
+                  
+        filename2   - the same as filename1, but for images of the 2nd column.
+        filename3   - the same as filename1, but for images of the 3rd column.
+        filename4   - the same as filename1, but for images of the 4th column.
+        nquad       - number of quads (rows in the 4 column table)
+        ofname      - output file name, default = "output"
+        nstart      - first number we will start with
+        showfig     - if True display the figure with gv
+    Output:
+        ofname.pdf file with images arranged in two columns
+        
+        
+    
+    """
 
-	ofnametex = ofname+".tex"
-		
-	f = open(ofnametex, 'w')
-	
-	
-	f.write('''\documentclass{article}
-	\usepackage{python}
-	\usepackage{graphicx}
-	\usepackage[top=1cm, bottom=1cm, left=1cm, right=2cm]{geometry}
-	\\begin{document}
-	
-	\\begin{python}
-	for i in range('''+str(nstart)+''', '''+str(nquad)+'''):
-	
-	    print r'\\begin{center}'
-	    print r'\parbox{0.16\linewidth}{\includegraphics[width=4.5cm, angle=0]{'''+filename1+''''+str(i).zfill(3)+'.eps}\\\\'
-	    print r' \centering  }'
-	    print r'\hspace{0.1\linewidth}'
-	    print r'\parbox{0.16\linewidth}{\includegraphics[width=4.5cm, angle=0]{'''+filename2+''''+str(i).zfill(3)+'.eps}\\\\'
-	    print r'\centering }'
-	    print r'\hspace{0.1\linewidth}'
-	    print r'\parbox{0.16\linewidth}{\includegraphics[width=4.5cm, angle=0]{'''+filename3+''''+str(i).zfill(3)+'.eps}\\\\'
-	    print r'\centering }'
-	    print r'\hspace{0.1\linewidth}'	
-	    print r'\parbox{0.16\linewidth}{\includegraphics[width=4.5cm, angle=0]{'''+filename4+''''+str(i).zfill(3)+'.eps}\\\\'
-	    print r'\centering }'
-	
-	
-	    print r'\end{center}'
-	
-	
-	
-	\end{python}
-	
-	\end{document}
-	
-	''')
-	
-	f.close()
-	
-	os.system("latex --shell-escape "+ofnametex)
-	os.system("dvipdf "+ofnametex[:-3]+"dvi")
-	if showfig==True:
-		os.system("gv "+ofnametex[:-3]+"pdf")
-		
+    ofnametex = ofname+".tex"
+        
+    f = open(ofnametex, 'w')
+    
+    
+    f.write('''\documentclass{article}
+    \usepackage{python}
+    \usepackage{graphicx}
+    \usepackage[top=1cm, bottom=1cm, left=1cm, right=2cm]{geometry}
+    \\begin{document}
+    
+    \\begin{python}
+    for i in range('''+str(nstart)+''', '''+str(nquad)+'''):
+    
+        print r'\\begin{center}'
+        print r'\parbox{0.16\linewidth}{\includegraphics[width=4.5cm, angle=0]{'''+filename1+''''+str(i).zfill(3)+'.eps}\\\\'
+        print r' \centering  }'
+        print r'\hspace{0.1\linewidth}'
+        print r'\parbox{0.16\linewidth}{\includegraphics[width=4.5cm, angle=0]{'''+filename2+''''+str(i).zfill(3)+'.eps}\\\\'
+        print r'\centering }'
+        print r'\hspace{0.1\linewidth}'
+        print r'\parbox{0.16\linewidth}{\includegraphics[width=4.5cm, angle=0]{'''+filename3+''''+str(i).zfill(3)+'.eps}\\\\'
+        print r'\centering }'
+        print r'\hspace{0.1\linewidth}' 
+        print r'\parbox{0.16\linewidth}{\includegraphics[width=4.5cm, angle=0]{'''+filename4+''''+str(i).zfill(3)+'.eps}\\\\'
+        print r'\centering }'
+    
+    
+        print r'\end{center}'
+    
+    
+    
+    \end{python}
+    
+    \end{document}
+    
+    ''')
+    
+    f.close()
+    
+    os.system("latex --shell-escape "+ofnametex)
+    os.system("dvipdf "+ofnametex[:-3]+"dvi")
+    if showfig==True:
+        os.system("gv "+ofnametex[:-3]+"pdf")
+        
 
 
 
 
 def eps5(filename1, filename2, filename3, filename4, filename5, nquad, ofname="output",nstart=0, showfig=True):
-	""" create .pdf file with images arranged in 5 columns 
-	    (useful, for example, when you want to compare output of 5 different runs)
-	Dependencies:
-		python.sty	- have to be in your working directory or Latex path.
-				  Can be obtained from here http://www.imada.sdu.dk/~ehmsen/python.sty
-		latex, dvipdf, gv
-	Usage: 
-		epsquad(filename1, filename2, filename3, filename4, filename5, npair, ofname="output",nstart=0,)
-	Input:
-		filename1	- constant part of .eps files
-				  that will be displayed in the left (1st) column.
-				  The rest of the name should be 3 char digit with zeros in front and .eps extension
-				  E.g. my_file_007.eps (here filename1="my_file_"), run1_040.eps, model1_900.eps 
-				  This files can be generated by komod.pssplit or komod.pssplit2eps
-				  
-		filename2	- the same as filename1, but for images of the 2nd column.
-		filename3	- the same as filename1, but for images of the 3rd column.
-		filename4	- the same as filename1, but for images of the 4th column.
-		filename5	- the same as filename1, but for images of the 5th column.
-		nquad 		- number of quads (rows in the 4 column table)
-		ofname		- output file name, default = "output"
-		nstart		- first number we will start with
-		showfig		- if True display the figure with gv
-	Output:
-		ofname.pdf file with images arranged in two columns
-		
-		
-	
-	"""
+    """ create .pdf file with images arranged in 5 columns 
+        (useful, for example, when you want to compare output of 5 different runs)
+    Dependencies:
+        python.sty  - have to be in your working directory or Latex path.
+                  Can be obtained from here http://www.imada.sdu.dk/~ehmsen/python.sty
+        latex, dvipdf, gv
+    Usage: 
+        epsquad(filename1, filename2, filename3, filename4, filename5, npair, ofname="output",nstart=0,)
+    Input:
+        filename1   - constant part of .eps files
+                  that will be displayed in the left (1st) column.
+                  The rest of the name should be 3 char digit with zeros in front and .eps extension
+                  E.g. my_file_007.eps (here filename1="my_file_"), run1_040.eps, model1_900.eps 
+                  This files can be generated by komod.pssplit or komod.pssplit2eps
+                  
+        filename2   - the same as filename1, but for images of the 2nd column.
+        filename3   - the same as filename1, but for images of the 3rd column.
+        filename4   - the same as filename1, but for images of the 4th column.
+        filename5   - the same as filename1, but for images of the 5th column.
+        nquad       - number of quads (rows in the 4 column table)
+        ofname      - output file name, default = "output"
+        nstart      - first number we will start with
+        showfig     - if True display the figure with gv
+    Output:
+        ofname.pdf file with images arranged in two columns
+        
+        
+    
+    """
 
-	ofnametex = ofname+".tex"
-		
-	f = open(ofnametex, 'w')
-	
-	
-	f.write('''\documentclass{article}
-	\usepackage{python}
-	\usepackage{graphicx}
-	\usepackage[top=1cm, bottom=1cm, left=1cm, right=2cm]{geometry}
-	\\begin{document}
-	
-	\\begin{python}
-	for i in range('''+str(nstart)+''', '''+str(nquad)+'''):
-	
-	    print r'\\begin{center}'
-	    print r'\parbox{0.105\linewidth}{\includegraphics[width=3.7cm, angle=0]{'''+filename1+''''+str(i).zfill(3)+'.eps}\\\\'
-	    print r' \centering  }'
-	    print r'\hspace{0.1\linewidth}'
-	    print r'\parbox{0.105\linewidth}{\includegraphics[width=3.7cm, angle=0]{'''+filename2+''''+str(i).zfill(3)+'.eps}\\\\'
-	    print r'\centering }'
-	    print r'\hspace{0.1\linewidth}'
-	    print r'\parbox{0.105\linewidth}{\includegraphics[width=3.7cm, angle=0]{'''+filename3+''''+str(i).zfill(3)+'.eps}\\\\'
-	    print r'\centering }'
-	    print r'\hspace{0.1\linewidth}'	
-	    print r'\parbox{0.105\linewidth}{\includegraphics[width=3.7cm, angle=0]{'''+filename4+''''+str(i).zfill(3)+'.eps}\\\\'
-	    print r'\centering }'
-	    print r'\hspace{0.1\linewidth}'	
-	    print r'\parbox{0.105\linewidth}{\includegraphics[width=3.7cm, angle=0]{'''+filename5+''''+str(i).zfill(3)+'.eps}\\\\'
-	    print r'\centering }'
-	
-	
-	    print r'\end{center}'
-	
-	
-	
-	\end{python}
-	
-	\end{document}
-	
-	''')
-	
-	f.close()
-	
-	os.system("latex --shell-escape "+ofnametex)
-	os.system("dvipdf "+ofnametex[:-3]+"dvi")
-	if showfig==True:
-		os.system("gv "+ofnametex[:-3]+"pdf")
-		
+    ofnametex = ofname+".tex"
+        
+    f = open(ofnametex, 'w')
+    
+    
+    f.write('''\documentclass{article}
+    \usepackage{python}
+    \usepackage{graphicx}
+    \usepackage[top=1cm, bottom=1cm, left=1cm, right=2cm]{geometry}
+    \\begin{document}
+    
+    \\begin{python}
+    for i in range('''+str(nstart)+''', '''+str(nquad)+'''):
+    
+        print r'\\begin{center}'
+        print r'\parbox{0.105\linewidth}{\includegraphics[width=3.7cm, angle=0]{'''+filename1+''''+str(i).zfill(3)+'.eps}\\\\'
+        print r' \centering  }'
+        print r'\hspace{0.1\linewidth}'
+        print r'\parbox{0.105\linewidth}{\includegraphics[width=3.7cm, angle=0]{'''+filename2+''''+str(i).zfill(3)+'.eps}\\\\'
+        print r'\centering }'
+        print r'\hspace{0.1\linewidth}'
+        print r'\parbox{0.105\linewidth}{\includegraphics[width=3.7cm, angle=0]{'''+filename3+''''+str(i).zfill(3)+'.eps}\\\\'
+        print r'\centering }'
+        print r'\hspace{0.1\linewidth}' 
+        print r'\parbox{0.105\linewidth}{\includegraphics[width=3.7cm, angle=0]{'''+filename4+''''+str(i).zfill(3)+'.eps}\\\\'
+        print r'\centering }'
+        print r'\hspace{0.1\linewidth}' 
+        print r'\parbox{0.105\linewidth}{\includegraphics[width=3.7cm, angle=0]{'''+filename5+''''+str(i).zfill(3)+'.eps}\\\\'
+        print r'\centering }'
+    
+    
+        print r'\end{center}'
+    
+    
+    
+    \end{python}
+    
+    \end{document}
+    
+    ''')
+    
+    f.close()
+    
+    os.system("latex --shell-escape "+ofnametex)
+    os.system("dvipdf "+ofnametex[:-3]+"dvi")
+    if showfig==True:
+        os.system("gv "+ofnametex[:-3]+"pdf")
+        
 
 
 
@@ -321,162 +321,162 @@ def eps5(filename1, filename2, filename3, filename4, filename5, nquad, ofname="o
 
 
 def pointfind(plat, plon, lat, lon, pdif = 1):
-	""" return indeces and values of the grid point closest to lat/lon point
-	Usage: 
-		pointfind(plat, plon, lat, lon, pdif = 0.5)
-	Input:
-		plat - latitude of the point
-		plon - longitude of the point
-		lat  - 2d array of latutudes
-		lon  - 2d array of longitudes
-		pdif  - initial +- window
-	Output:
-		indeces and values of the points that fulfil conditions 
-		
-		
-	
-	"""
-	
-	fff = 10
-	while (fff > 1):
-		
-		#conditions for latitude (lat - 2d array of latitudes)
-		c_lat=(lat>(plat-pdif))&(lat<(plat+pdif))
-		#conditions for longiyude (lon - 2d array of longitudes)
-		c_lon=(lon>(plon-pdif))&(lon<(plon+pdif))
-		
-		#combine both conditions together
-		c_all=c_lat&c_lon
-		
-		#values of the points that fulfil conditions
-		platf = lat[numpy.nonzero(c_all)]
-		plonf = lon[numpy.nonzero(c_all)]
-		
-				
-		#indeces of the poin that fulfil conditions 
-		g = numpy.nonzero(c_all)
-		
-		
-		#check if we have found uniq solution
-		fff = platf.shape[0]
-		# decrease window to reduce amount of solutions if we have more than one
-		#print(pdif)
-		pdif = pdif-0.001
-	print("coordinates of the point that fulfil conditions: "+str(platf)+" "+str(plonf))
-	print("indeces of the point that fulfil conditions: "+str(g[0])+" "+str(g[1]))
-	
-	return(g, platf, plonf)
+    """ return indeces and values of the grid point closest to lat/lon point
+    Usage: 
+        pointfind(plat, plon, lat, lon, pdif = 0.5)
+    Input:
+        plat - latitude of the point
+        plon - longitude of the point
+        lat  - 2d array of latutudes
+        lon  - 2d array of longitudes
+        pdif  - initial +- window
+    Output:
+        indeces and values of the points that fulfil conditions 
+        
+        
+    
+    """
+    
+    fff = 10
+    while (fff > 1):
+        
+        #conditions for latitude (lat - 2d array of latitudes)
+        c_lat=(lat>(plat-pdif))&(lat<(plat+pdif))
+        #conditions for longiyude (lon - 2d array of longitudes)
+        c_lon=(lon>(plon-pdif))&(lon<(plon+pdif))
+        
+        #combine both conditions together
+        c_all=c_lat&c_lon
+        
+        #values of the points that fulfil conditions
+        platf = lat[numpy.nonzero(c_all)]
+        plonf = lon[numpy.nonzero(c_all)]
+        
+                
+        #indeces of the poin that fulfil conditions 
+        g = numpy.nonzero(c_all)
+        
+        
+        #check if we have found uniq solution
+        fff = platf.shape[0]
+        # decrease window to reduce amount of solutions if we have more than one
+        #print(pdif)
+        pdif = pdif-0.001
+    print("coordinates of the point that fulfil conditions: "+str(platf)+" "+str(plonf))
+    print("indeces of the point that fulfil conditions: "+str(g[0])+" "+str(g[1]))
+    
+    return(g, platf, plonf)
 
 def pointfind2(plat, plon, lat, lon, pdif=1):
-	""" return indeces and values of the grid point closest to lat/lon point
-	the same as pointfind but could be faster
-	Usage: 
-		pointfind(plat, plon, lat, lon, pdif = 0.5)
-	Input:
-		plat - latitude of the point
-		plon - longitude of the point
-		lat  - 2d array of latutudes
-		lon  - 2d array of longitudes
-		pdif  - we don't need it but leave it to have the same input as pointfind
-	Output:
-		indeces and values of the points that fulfil conditions 
-		
-		
-	
-	"""
+    """ return indeces and values of the grid point closest to lat/lon point
+    the same as pointfind but could be faster
+    Usage: 
+        pointfind(plat, plon, lat, lon, pdif = 0.5)
+    Input:
+        plat - latitude of the point
+        plon - longitude of the point
+        lat  - 2d array of latutudes
+        lon  - 2d array of longitudes
+        pdif  - we don't need it but leave it to have the same input as pointfind
+    Output:
+        indeces and values of the points that fulfil conditions 
+        
+        
+    
+    """
 
-	dist_min = 1000000.
-	
-	
-	for i in range(lon.shape[0]):
-		for j in range(lon.shape[1]):
-			dist = Ngl.gc_dist(plat,plon,lat[i,j],lon[i,j])
-			if dist_min > dist:
-				dist_min = dist
-				i_min = i
-				j_min = j
-				lat_min = lat[i,j]
-				lon_min = lon[i,j]
-	
-	print(i_min,j_min,lat_min,lon_min)
-	gg1 = i_min, j_min
-	
-	return(gg1, lat_min, lon_min)
+    dist_min = 1000000.
+    
+    
+    for i in range(lon.shape[0]):
+        for j in range(lon.shape[1]):
+            dist = Ngl.gc_dist(plat,plon,lat[i,j],lon[i,j])
+            if dist_min > dist:
+                dist_min = dist
+                i_min = i
+                j_min = j
+                lat_min = lat[i,j]
+                lon_min = lon[i,j]
+    
+    print(i_min,j_min,lat_min,lon_min)
+    gg1 = i_min, j_min
+    
+    return(gg1, lat_min, lon_min)
 
 
 
 
 def get_transect(lat, lon, data, lat1, lon1, lat2, lon2, npoints = 10, pdif = 1, norep=False):
-	
+    
 
-	plat, plon = Ngl.gc_interp(lat1,lon1,lat2,lon2,npoints)
-	
-	m_grid = numpy.zeros((plon.shape[0]))
-	n_grid = numpy.zeros((plat.shape[0]))
-	grid_lats = numpy.zeros((plat.shape[0]))
-	grid_lons = numpy.zeros((plat.shape[0]))
-	
-	for k in range(plon.shape[0]):
-		coord, trash1, trash1 = pointfind2(plat[k], plon[k], lat, lon, pdif)
-		m_grid[k] = coord[0]
-		n_grid[k] = coord[1]
-		grid_lats[k] = lat[m_grid[k],n_grid[k]]
-		grid_lons[k] = lon[m_grid[k],n_grid[k]]
-	
-	
-	if len(data.shape) == 4:
-		data = data[0,:,:,:]
-	elif len(data.shape) == 5:
-		data = data[0,0,:,:,:]
-	
-		
-	data_prof = numpy.zeros(([data.shape[0],npoints]))   
-	
-	
-	
-	for j in range(data_prof.shape[1]):
-		data_prof[:,j] = data[:,m_grid[j],n_grid[j]]
-	
-	
-	x_kilometers = numpy.zeros((grid_lats.shape[0]))
-	
-	for j in range(grid_lats.shape[0] - 1):
-		angle = Ngl.gc_dist(grid_lats[j], grid_lons[j], grid_lats[j+1], grid_lons[j+1] )
-		x_kilometers[j+1] = Ngl.gc_convert(angle, 2) + x_kilometers[j]
-	
-	
-	numpy.savez("outfile.npz", data_prof, x_kilometers)
-	
-	
-	
-	if norep == True:
-		data_prof_norep = numpy.zeros(([data_prof.shape[0],1]))
-		x_kilometers_norep = numpy.array(([]))
-		m_grid_norep       = numpy.array(([]))
-		n_grid_norep       = numpy.array(([]))
-		present_location = -999999.999
+    plat, plon = Ngl.gc_interp(lat1,lon1,lat2,lon2,npoints)
+    
+    m_grid = numpy.zeros((plon.shape[0]))
+    n_grid = numpy.zeros((plat.shape[0]))
+    grid_lats = numpy.zeros((plat.shape[0]))
+    grid_lons = numpy.zeros((plat.shape[0]))
+    
+    for k in range(plon.shape[0]):
+        coord, trash1, trash1 = pointfind2(plat[k], plon[k], lat, lon, pdif)
+        m_grid[k] = coord[0]
+        n_grid[k] = coord[1]
+        grid_lats[k] = lat[m_grid[k],n_grid[k]]
+        grid_lons[k] = lon[m_grid[k],n_grid[k]]
+    
+    
+    if len(data.shape) == 4:
+        data = data[0,:,:,:]
+    elif len(data.shape) == 5:
+        data = data[0,0,:,:,:]
+    
+        
+    data_prof = numpy.zeros(([data.shape[0],npoints]))   
+    
+    
+    
+    for j in range(data_prof.shape[1]):
+        data_prof[:,j] = data[:,m_grid[j],n_grid[j]]
+    
+    
+    x_kilometers = numpy.zeros((grid_lats.shape[0]))
+    
+    for j in range(grid_lats.shape[0] - 1):
+        angle = Ngl.gc_dist(grid_lats[j], grid_lons[j], grid_lats[j+1], grid_lons[j+1] )
+        x_kilometers[j+1] = Ngl.gc_convert(angle, 2) + x_kilometers[j]
+    
+    
+    numpy.savez("outfile.npz", data_prof, x_kilometers)
+    
+    
+    
+    if norep == True:
+        data_prof_norep = numpy.zeros(([data_prof.shape[0],1]))
+        x_kilometers_norep = numpy.array(([]))
+        m_grid_norep       = numpy.array(([]))
+        n_grid_norep       = numpy.array(([]))
+        present_location = -999999.999
 
-		for k in range(x_kilometers.shape[0]):
-			if int(x_kilometers[k]) != int(present_location):
-				present_location = x_kilometers[k]
-				data_prof_norep = numpy.hstack((data_prof_norep, data_prof[:,k:k+1])) 
-				x_kilometers_norep = numpy.append(x_kilometers_norep, x_kilometers[k:k+1])
-				m_grid_norep = numpy.append(m_grid_norep, m_grid[k:k+1])
-				n_grid_norep = numpy.append(n_grid_norep, n_grid[k:k+1])
-			
+        for k in range(x_kilometers.shape[0]):
+            if int(x_kilometers[k]) != int(present_location):
+                present_location = x_kilometers[k]
+                data_prof_norep = numpy.hstack((data_prof_norep, data_prof[:,k:k+1])) 
+                x_kilometers_norep = numpy.append(x_kilometers_norep, x_kilometers[k:k+1])
+                m_grid_norep = numpy.append(m_grid_norep, m_grid[k:k+1])
+                n_grid_norep = numpy.append(n_grid_norep, n_grid[k:k+1])
+            
 
-		data_prof_norep = data_prof_norep[:,1:] 
-		data_prof = data_prof_norep
-		x_kilometers = x_kilometers_norep
-		m_grid = m_grid_norep
-		n_grid = n_grid_norep
-		
-	print(x_kilometers)
-	print(m_grid)
-	print(n_grid)
-	
-	return(data_prof, x_kilometers, m_grid, n_grid )
-	
+        data_prof_norep = data_prof_norep[:,1:] 
+        data_prof = data_prof_norep
+        x_kilometers = x_kilometers_norep
+        m_grid = m_grid_norep
+        n_grid = n_grid_norep
+        
+    print(x_kilometers)
+    print(m_grid)
+    print(n_grid)
+    
+    return(data_prof, x_kilometers, m_grid, n_grid )
+    
 def get_cost(cost_list, cost_var):
     ''' Get cost value from costfunction???? files
     
@@ -550,7 +550,7 @@ def sendemail(from_addr, to_addr_list, cc_addr_list,
     problems = server.sendmail(from_addr, to_addr_list, message)
     server.quit()
 
-def calc_area(data, area_size, lat=None, blat=None):
+def calc_area(data, area_size, lat=None, blat=None, threshold=0.15):
     ''' Calculates sea ice area
     
     Input:
@@ -569,13 +569,13 @@ def calc_area(data, area_size, lat=None, blat=None):
         ii, jj = np.where((lat<blat))
         data[ii,jj] = 0.
         
-    data[:,:][data[:,:]<0.15]=0.
+    data[:,:][data[:,:]<threshold]=0.
     data_masked      = np.ma.masked_equal(data[:,:], 0)
     data_masked_mult = data_masked.astype('float64')*area_size.astype('float64')
         
     return np.ma.sum(data_masked_mult)
 
-def calc_extent(data, area_size, lat=None, blat=None):
+def calc_extent(data, area_size, lat=None, blat=None, threshold=0.15):
     ''' Calculates sea ice area
     
     Input:
@@ -594,14 +594,14 @@ def calc_extent(data, area_size, lat=None, blat=None):
         ii, jj = np.where((lat<blat))
         data[ii,jj] = 0.
         
-    data[:,:][data[:,:]<0.15]=0.
-    data[:,:][data[:,:]>=0.15]=1.
+    data[:,:][data[:,:]<threshold]=0.
+    data[:,:][data[:,:]>=threshold]=1.
     data_masked      = np.ma.masked_equal(data[:,:], 0)
     data_masked_mult = data_masked.astype('float64')*area_size.astype('float64')
     
     return np.ma.sum(data_masked_mult)  
 
-def ice_comp_model_to_osi(pathToModel, modelYear, modelIteration, boundLat, pathToOSI, param = 'area'):
+def ice_comp_model_to_osi(pathToModel, modelYear, modelIteration, boundLat, pathToOSI, param = 'area', threshold=0.15):
     '''
     Plot sea ice area from satellite data and several model iterations
     '''
@@ -616,16 +616,17 @@ def ice_comp_model_to_osi(pathToModel, modelYear, modelIteration, boundLat, path
     for mm in range(12):
         if param == 'area':
             osi_area.append(calc_area(fsat.variables['ice_conc'][mm,:,:]/100,\
-                                      area_osi, osi_lat, blat=boundLat)/1e6)
+                                      area_osi, osi_lat, blat=boundLat)/1e6, threshold=threshold)
         elif param == 'extent':
-        	osi_area.append(calc_extent(fsat.variables['ice_conc'][mm,:,:]/100,\
-        	                area_osi, osi_lat, blat=boundLat)/1e6)
+            osi_area.append(calc_extent(fsat.variables['ice_conc'][mm,:,:]/100,\
+                            area_osi, osi_lat, blat=boundLat)/1e6, threshold=threshold)
         
     
     g  = Dataset('/scratch/local1/POL06/1_test/grid.cdf')
     dxc = g.variables['dxc'][0,:,:]
     dyc = g.variables['dyc'][0,:,:]
     lat = g.variables['yc'][0,:,:]
+
     dxcXdyc = dxc*dyc
 
     area_model=np.zeros((len(modelIteration), 12))
@@ -633,12 +634,12 @@ def ice_comp_model_to_osi(pathToModel, modelYear, modelIteration, boundLat, path
     for (it, iteration) in enumerate(modelIteration):
         fm = MFDataset(pathToModel+'/'+modelYear+'/'+'it'+str(iteration)+'/fw/*.cdf')
         for mm in range(12):
-        	if param == 'area':
-        	    area_model[it,mm] = calc_area(fm.variables['area'][mm,:,:],\
-        	    	                          dxcXdyc, lat, blat=boundLat)/10e11
-        	elif param == 'extent':
-        		area_model[it,mm] = calc_extent(fm.variables['area'][mm,:,:],\
-        			                          dxcXdyc, lat, blat=boundLat)/10e11
+            if param == 'area':
+                area_model[it,mm] = calc_area(fm.variables['area'][mm,:,:],\
+                                              dxcXdyc, lat, blat=boundLat,threshold=threshold)/10e11
+            elif param == 'extent':
+                area_model[it,mm] = calc_extent(fm.variables['area'][mm,:,:],\
+                                              dxcXdyc, lat, blat=boundLat,threshold=threshold)/10e11
     
         fm.close()
     
@@ -652,8 +653,85 @@ def ice_comp_model_to_osi(pathToModel, modelYear, modelIteration, boundLat, path
 
     return dd.plot(figsize=(10,5))
 
+def ice_comp_model_to_sat(pathToModel, modelYear, modelIteration, \
+                          boundLat, pathToOSI, param = 'area', threshold=0.15, coast_exp=False):
+    '''
+    Plot sea ice area from satellite data and several model iterations
+    '''
+    g  = Dataset('/scratch/local1/POL06/1_test/grid.cdf')
+    dxc = g.variables['dxc'][0,:,:]
+    dyc = g.variables['dyc'][0,:,:]
+    lat = g.variables['yc'][0,:,:]
+    topo = g.variables['topo'][0,:,:]
+    dxcXdyc = dxc*dyc
+    if coast_exp==True:
+        topo2 = expand_coast(topo)
 
-def ice_comp_model_to_osi_table(pathToModel, modelYears, modelIteration, boundLat, pathToOSI, param = 'area'):
+    area_model=np.zeros((len(modelIteration), 12))
+
+    for (it, iteration) in enumerate(modelIteration):
+        fm = MFDataset(pathToModel+'/'+modelYear+'/'+'it'+str(iteration)+'/fw/*.cdf')
+        for mm in range(12):
+            if param == 'area':
+                if expand_coast==True:
+                    temp_area = fm.variables['area'][mm,:,:]
+                    temp_area = np.ma.masked_array(temp_area, mask = topo2.mask)
+                    area_model[it,mm] = calc_area(temp_area,\
+                                                  dxcXdyc, lat, blat=boundLat, threshold=threshold)/10e11
+                else:
+                    area_model[it,mm] = calc_area(fm.variables['area'][mm,:,:],\
+                                              dxcXdyc, lat, blat=boundLat, threshold=threshold)/10e11
+            elif param == 'extent':
+                if expand_coast==True:
+                    temp_area = fm.variables['area'][mm,:,:]
+                    temp_area = np.ma.masked_array(temp_area, mask = topo2.mask)
+                    area_model[it,mm] = calc_extent(temp_area,\
+                                              dxcXdyc, lat, blat=boundLat, threshold=threshold)/10e11
+                else:
+                    area_model[it,mm] = calc_extent(fm.variables['area'][mm,:,:],\
+                                              dxcXdyc, lat, blat=boundLat, threshold=threshold)/10e11
+    
+        fm.close()
+
+    fsat = MFDataset(pathToOSI+modelYear+'??.nc')
+    
+    #osi_ice = fsat.variables['ice'][0,:,:]
+    
+    osi_area = []
+    for mm in range(12):
+        if param == 'area':
+            area_temp = fsat.variables['ice'][mm,:,:]
+            if coast_exp==True:
+                area_temp = np.ma.masked_array(area_temp, mask = topo2.mask)
+            else:
+                area_temp = np.ma.masked_array(area_temp, mask = topo.mask)
+            
+            area_temp = np.ma.masked_less_equal(area_temp, threshold)
+            osi_area.append(calc_area(np.ma.filled(area_temp,0),\
+                            dxcXdyc, lat, blat=boundLat, threshold=threshold)/10e11)
+            
+        elif param == 'extent':
+            area_temp = fsat.variables['ice'][mm,:,:]
+            if coast_exp==True:
+                area_temp = np.ma.masked_array(area_temp, mask = topo2.mask)
+            else:
+                area_temp = np.ma.masked_array(area_temp, mask = topo.mask)
+            
+            area_temp = np.ma.masked_less_equal(area_temp, threshold)
+            osi_area.append(calc_extent(np.ma.filled(area_temp,0),\
+                            dxcXdyc, lat, blat=boundLat, threshold=threshold)/10e11)
+        
+    dates = pd.date_range(modelYear+'-01', str(int(modelYear)+1)+'-01', freq='M')
+    dd = pd.DataFrame(index=dates)
+
+    dd['Satellite']=osi_area
+
+    for (it , iteration) in enumerate(modelIteration):
+        dd['it'+str(iteration)]=area_model[it,:]
+
+    return dd.plot(figsize=(10,5))
+
+def ice_comp_model_to_osi_table(pathToModel, modelYears, modelIteration, boundLat, pathToOSI, param = 'area', threshold=0.15):
 
     diff_array = numpy.zeros((len(modelYears), 12))
 
@@ -670,10 +748,10 @@ def ice_comp_model_to_osi_table(pathToModel, modelYears, modelIteration, boundLa
         for mm in range(12):
             if param == 'area':
                 osi_area.append(calc_area(fsat.variables['ice_conc'][mm,:,:]/100,\
-                                      area_osi, osi_lat, blat=boundLat)/1e6)
+                                      area_osi, osi_lat, blat=boundLat, threshold=threshold)/1e6)
             elif param == 'extent':
                 osi_area.append(calc_extent(fsat.variables['ice_conc'][mm,:,:]/100,\
-                            area_osi, osi_lat, blat=boundLat)/1e6)
+                            area_osi, osi_lat, blat=boundLat, threshold=threshold)/1e6)
         
     
         g  = Dataset('/scratch/local1/POL06/1_test/grid.cdf')
@@ -696,13 +774,139 @@ def ice_comp_model_to_osi_table(pathToModel, modelYears, modelIteration, boundLa
             for mm in range(12):
                 if param == 'area':
                     area_model[it,mm] = calc_area(fm.variables['area'][mm,:,:],\
-        	    	                          dxcXdyc, lat, blat=boundLat)/10e11
+                                              dxcXdyc, lat, blat=boundLat)/10e11
                 elif param == 'extent':
                     area_model[it,mm] = calc_extent(fm.variables['area'][mm,:,:],\
-        			                          dxcXdyc, lat, blat=boundLat)/10e11
+                                              dxcXdyc, lat, blat=boundLat)/10e11
     
             fm.close()
         diff_array[nnum,:] = area_model[0,:]-osi_area[:]
     return diff_array
 
     
+def ice_comp_model_to_sat_table(pathToModel, modelYears, modelIteration,\
+                               boundLat, pathToOSI, param = 'area', threshold=0.15, coast_exp=False):
+
+    diff_array = numpy.zeros((len(modelYears), 12))
+
+    for (nnum, yyear) in enumerate(modelYears):
+        
+        g  = Dataset('/scratch/local1/POL06/1_test/grid.cdf')
+        dxc = g.variables['dxc'][0,:,:]
+        dyc = g.variables['dyc'][0,:,:]
+        lat = g.variables['yc'][0,:,:]
+        topo = g.variables['topo'][0,:,:]
+        dxcXdyc = dxc*dyc
+        if coast_exp==True:
+            topo2 = expand_coast(topo)
+        
+        area_model=np.zeros((len(modelIteration), 12))
+    
+        if modelIteration[0] == 'last':
+            gg = glob.glob(pathToModel+'/'+yyear+'/'+'it*')
+            gg.sort()
+            lastit = [int(gg[-1].split('/')[-1].split('t')[-1])]
+        else:
+            lastit = modelIteration
+
+        for (it, iteration) in enumerate(lastit):
+            fm = MFDataset(pathToModel+'/'+yyear+'/'+'it'+str(iteration)+'/fw/*.cdf')
+            for mm in range(12):
+                if param == 'area':
+                    if expand_coast==True:
+                        temp_area = fm.variables['area'][mm,:,:]
+                        temp_area = np.ma.masked_array(temp_area, mask = topo2.mask)
+                        area_model[it,mm] = calc_area(temp_area,\
+                                                  dxcXdyc, lat, blat=boundLat, threshold=threshold)/10e11
+                    else:
+                        area_model[it,mm] = calc_area(fm.variables['area'][mm,:,:],\
+                                              dxcXdyc, lat, blat=boundLat, threshold=threshold)/10e11
+                elif param == 'extent':
+                    if expand_coast==True:
+                        temp_area = fm.variables['area'][mm,:,:]
+                        temp_area = np.ma.masked_array(temp_area, mask = topo2.mask)
+                        area_model[it,mm] = calc_extent(temp_area,\
+                                              dxcXdyc, lat, blat=boundLat, threshold=threshold)/10e11
+                    else:
+                        area_model[it,mm] = calc_extent(fm.variables['area'][mm,:,:],\
+                                              dxcXdyc, lat, blat=boundLat, threshold=threshold)/10e11
+    
+            fm.close()
+
+        fsat = MFDataset(pathToOSI+yyear+'??.nc')
+        
+        osi_area = []
+        for mm in range(12):
+            if param == 'area':
+                area_temp = fsat.variables['ice'][mm,:,:]
+                if coast_exp==True:
+                    area_temp = np.ma.masked_array(area_temp, mask = topo2.mask)
+                else:
+                    area_temp = np.ma.masked_array(area_temp, mask = topo.mask)
+            
+                area_temp = np.ma.masked_less_equal(area_temp, threshold)
+                osi_area.append(calc_area(np.ma.filled(area_temp,0),\
+                            dxcXdyc, lat, blat=boundLat, threshold=threshold)/10e11)
+            
+            elif param == 'extent':
+                area_temp = fsat.variables['ice'][mm,:,:]
+                if coast_exp==True:
+                    area_temp = np.ma.masked_array(area_temp, mask = topo2.mask)
+                else:
+                    area_temp = np.ma.masked_array(area_temp, mask = topo.mask)
+            
+                area_temp = np.ma.masked_less_equal(area_temp, threshold)
+                osi_area.append(calc_extent(np.ma.filled(area_temp,0),\
+                            dxcXdyc, lat, blat=boundLat, threshold=threshold)/10e11)
+        
+    
+        
+        diff_array[nnum,:] = area_model[0,:]-osi_area[:]
+    return diff_array
+
+def expand_coast(topo):
+    topo2 = topo.copy()
+    for i in range(topo.shape[0]):
+        for j in range(topo.shape[1]):
+            if topo.mask[i,j] == True:
+            
+                try:
+                    topo2[i+1,j+1] = np.ma.masked
+                except IndexError:
+                    pass
+            
+                try:
+                    topo2[i,j+1] = np.ma.masked
+                except IndexError:
+                    pass
+            
+                try:
+                    topo2[i-1,j+1] = np.ma.masked
+                except IndexError:
+                    pass
+            
+                try:
+                    topo2[i-1,j] = np.ma.masked
+                except IndexError:
+                    pass
+            
+                try:
+                    topo2[i-1,j-1] = np.ma.masked
+                except IndexError:
+                    pass
+            
+                try:
+                    topo2[i,j-1] = np.ma.masked
+                except IndexError:
+                    pass
+            
+                try:
+                    topo2[i+1,j-1] = np.ma.masked
+                except IndexError:
+                    pass
+            
+                try:
+                    topo2[i+1,j] = np.ma.masked
+                except IndexError:
+                    pass
+    return topo2
