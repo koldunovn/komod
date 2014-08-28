@@ -616,10 +616,10 @@ def ice_comp_model_to_osi(pathToModel, modelYear, modelIteration, boundLat, path
     for mm in range(12):
         if param == 'area':
             osi_area.append(calc_area(fsat.variables['ice_conc'][mm,:,:]/100,\
-                                      area_osi, osi_lat, blat=boundLat)/1e6, threshold=threshold)
+                                      area_osi, osi_lat, blat=boundLat, threshold=threshold)/1e6)
         elif param == 'extent':
             osi_area.append(calc_extent(fsat.variables['ice_conc'][mm,:,:]/100,\
-                            area_osi, osi_lat, blat=boundLat)/1e6, threshold=threshold)
+                            area_osi, osi_lat, blat=boundLat, threshold=threshold)/1e6)
         
     
     g  = Dataset('/scratch/local1/POL06/1_test/grid.cdf')
@@ -651,7 +651,7 @@ def ice_comp_model_to_osi(pathToModel, modelYear, modelIteration, boundLat, path
     for (it , iteration) in enumerate(modelIteration):
         dd['it'+str(iteration)]=area_model[it,:]
 
-    return dd.plot(figsize=(10,5))
+    return dd.plot(figsize=(10,5), lw = 3)
 
 def ice_comp_model_to_sat(pathToModel, modelYear, modelIteration, \
                           boundLat, pathToOSI, param = 'area', threshold=0.15, coast_exp=False):
@@ -910,3 +910,35 @@ def expand_coast(topo):
                 except IndexError:
                     pass
     return topo2
+
+
+def normalize_angle(ang,type):
+  """
+  Function from PyNgl module (https://www.pyngl.ucar.edu/)
+  
+Normalizes any angle in degrees to be in the interval [0.,360.) or
+[-180.,180.).
+
+nangle = Ngl.normalize_angle(angle, option)
+
+angle -- An angle in degrees.
+
+option -- An option flag that is either zero or non-zero.
+  """
+#
+#  This function normalizes the angle (assumed to be in degrees) to
+#  an equivalent angle in the range [0.,360.) if type equals 0, or
+#  to an equivalent angle in the range [-180.,180.) if type is not zero.
+#
+  bang = ang
+  if (type == 0):
+    while(bang < 0.):
+      bang = bang + 360.
+    while(bang >= 360.):
+      bang = bang - 360.
+  else:
+    while(bang < -180.):
+      bang = bang + 360.
+    while(bang >= 180.):
+      bang = bang - 360.
+  return bang
