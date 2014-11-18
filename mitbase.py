@@ -21,7 +21,7 @@ def regbase(region):
         mapDict['boundinglat'] = 60
         mapDict['lon_0'] = 0
         mapDict['resolution'] = 'l'
-    if region == 'Clacindia':
+    if region == 'Glacindia':
         mapDict['projection'] = 'rotpole'
         mapDict['o_lon_p']=-123.34
         mapDict['o_lat_p']=79.95
