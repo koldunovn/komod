@@ -942,3 +942,42 @@ option -- An option flag that is either zero or non-zero.
     while(bang >= 180.):
       bang = bang - 360.
   return bang
+
+def ice_comp_model_to_sat_table_rm(pathToModel, modelYears, modelIteration,\
+                               boundLat, pathToOSI):
+
+    diff_array = numpy.zeros((len(modelYears), 12))
+
+    for (nnum, yyear) in enumerate(modelYears):
+        
+        g  = Dataset('/scratch/local1/POL06/1_test/grid.cdf')
+        dxc = g.variables['dxc'][0,:,:]
+        dyc = g.variables['dyc'][0,:,:]
+        lat = g.variables['yc'][0,:,:]
+        topo = g.variables['topo'][0,:,:]
+        dxcXdyc = dxc*dyc
+
+        
+        #area_model=np.zeros((len(modelIteration), 12))
+    
+        if modelIteration[0] == 'last':
+            gg = glob.glob(pathToModel+'/'+yyear+'/'+'it*')
+            gg.sort()
+            lastit = [int(gg[-1].split('/')[-1].split('t')[-1])]
+        else:
+            lastit = modelIteration
+
+        for (it, iteration) in enumerate(lastit):
+            fm = MFDataset(pathToModel+'/'+yyear+'/'+'it'+str(iteration)+'/fw/*.cdf')
+            fsat = MFDataset(pathToOSI+yyear+'??.nc')
+            for mm in range(12):
+                aa_model = np.ma.filled(fm.variables['area'][mm,:,:], 0) * dxcXdyc
+                bb_satel = (fsat.variables['ice'][mm,:,:]) * dxcXdyc
+                cc_diff  = aa_model - bb_satel
+                diff_array[nnum,mm] = np.sqrt(cc_diff**2).sum()
+
+    
+            fm.close()
+            fsat.close()
+
+    return diff_array
