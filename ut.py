@@ -622,7 +622,7 @@ def ice_comp_model_to_osi(pathToModel, modelYear, modelIteration, boundLat, path
                             area_osi, osi_lat, blat=boundLat, threshold=threshold)/1e6)
         
     
-    g  = Dataset('/scratch/local1/POL06/1_test/grid.cdf')
+    g  = Dataset('./grid.cdf')
     dxc = g.variables['dxc'][0,:,:]
     dyc = g.variables['dyc'][0,:,:]
     lat = g.variables['yc'][0,:,:]
@@ -658,7 +658,7 @@ def ice_comp_model_to_sat(pathToModel, modelYear, modelIteration, \
     '''
     Plot sea ice area from satellite data and several model iterations
     '''
-    g  = Dataset('/scratch/local1/POL06/1_test/grid.cdf')
+    g  = Dataset('./grid.cdf')
     dxc = g.variables['dxc'][0,:,:]
     dyc = g.variables['dyc'][0,:,:]
     lat = g.variables['yc'][0,:,:]
@@ -754,7 +754,7 @@ def ice_comp_model_to_osi_table(pathToModel, modelYears, modelIteration, boundLa
                             area_osi, osi_lat, blat=boundLat, threshold=threshold)/1e6)
         
     
-        g  = Dataset('/scratch/local1/POL06/1_test/grid.cdf')
+        g  = Dataset('./grid.cdf')
         dxc = g.variables['dxc'][0,:,:]
         dyc = g.variables['dyc'][0,:,:]
         lat = g.variables['yc'][0,:,:]
@@ -791,7 +791,7 @@ def ice_comp_model_to_sat_table(pathToModel, modelYears, modelIteration,\
 
     for (nnum, yyear) in enumerate(modelYears):
         
-        g  = Dataset('/scratch/local1/POL06/1_test/grid.cdf')
+        g  = Dataset('./grid.cdf')
         dxc = g.variables['dxc'][0,:,:]
         dyc = g.variables['dyc'][0,:,:]
         lat = g.variables['yc'][0,:,:]
@@ -950,7 +950,7 @@ def ice_comp_model_to_sat_table_rm(pathToModel, modelYears, modelIteration,\
 
     for (nnum, yyear) in enumerate(modelYears):
         
-        g  = Dataset('/scratch/local1/POL06/1_test/grid.cdf')
+        g  = Dataset('./grid.cdf')
         dxc = g.variables['dxc'][0,:,:]
         dyc = g.variables['dyc'][0,:,:]
         lat = g.variables['yc'][0,:,:]
