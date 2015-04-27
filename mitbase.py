@@ -32,6 +32,17 @@ def regbase(region):
         mapDict['urcrnrlon']=105
         mapDict['urcrnrlat']=38
         mapDict['resolution']="l"
+    if region == "CORDEX_SA":
+        mapDict['projection'] = 'rotpole'
+        mapDict['o_lon_p']=-123.34
+        mapDict['o_lat_p']=79.95
+        mapDict['lon_0'] = 180-123.34
+        mapDict['lat_0']=90-79.95
+        mapDict['llcrnrlon']=21
+        mapDict['llcrnrlat']=-19
+        mapDict['urcrnrlon']=125
+        mapDict['urcrnrlat']=45
+        mapDict['resolution']="l"
                     
     return mapDict
 
