@@ -944,7 +944,8 @@ option -- An option flag that is either zero or non-zero.
   return bang
 
 def ice_comp_model_to_sat_table_rm(pathToModel, modelYears, modelIteration,\
-                               boundLat, pathToOSI):
+                               boundLat, pathToOSI, param):
+
 
     diff_array = numpy.zeros((len(modelYears), 12))
 
@@ -971,10 +972,27 @@ def ice_comp_model_to_sat_table_rm(pathToModel, modelYears, modelIteration,\
             fm = MFDataset(pathToModel+'/'+yyear+'/'+'it'+str(iteration)+'/fw/*.cdf')
             fsat = MFDataset(pathToOSI+yyear+'??.nc')
             for mm in range(12):
-                aa_model = np.ma.filled(fm.variables['area'][mm,:,:], 0) * dxcXdyc
-                bb_satel = (fsat.variables['ice'][mm,:,:]) * dxcXdyc
-                cc_diff  = aa_model - bb_satel
-                diff_array[nnum,mm] = np.sqrt(cc_diff**2).sum()
+                    if param == 'area':
+
+                        aa_model = np.ma.filled(fm.variables['area'][mm,:,:], 0) * dxcXdyc
+                        bb_satel = (fsat.variables['ice'][mm,:,:]) * dxcXdyc
+                        cc_diff  = aa_model - bb_satel
+                        diff_array[nnum,mm] = np.sqrt(cc_diff**2).sum()
+                    
+                    if param == 'extent':
+
+                        dmodel = np.ma.filled(fm.variables['area'][mm,:,:], 0)
+                        dmodel[dmodel<0.15] = 0
+                        dmodel[dmodel>=0.15] = 1
+                        aa_model = dmodel * dxcXdyc
+
+                        dsat = fsat.variables['ice'][mm,:,:]
+                        dsat[dsat<0.15] = 0
+                        dsat[dsat>=0.15] = 1
+                        bb_satel = dsat * dxcXdyc
+                        cc_diff  = aa_model - bb_satel
+                        diff_array[nnum,mm] = np.sqrt(cc_diff**2).sum()
+
 
     
             fm.close()
