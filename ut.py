@@ -32,7 +32,7 @@ except ImportError:
     pass
 import glob
 from netCDF4 import Dataset, MFDataset
-from math import pi
+
 
 def pssplit(filename, npages):
     """split multipage .ps file in to one-page files.
@@ -945,7 +945,8 @@ option -- An option flag that is either zero or non-zero.
   return bang
 
 def ice_comp_model_to_sat_table_rm(pathToModel, modelYears, modelIteration,\
-                               boundLat, pathToOSI):
+                               boundLat, pathToOSI, param):
+
 
     diff_array = numpy.zeros((len(modelYears), 12))
 
@@ -972,43 +973,30 @@ def ice_comp_model_to_sat_table_rm(pathToModel, modelYears, modelIteration,\
             fm = MFDataset(pathToModel+'/'+yyear+'/'+'it'+str(iteration)+'/fw/*.cdf')
             fsat = MFDataset(pathToOSI+yyear+'??.nc')
             for mm in range(12):
-                aa_model = np.ma.filled(fm.variables['area'][mm,:,:], 0) * dxcXdyc
-                bb_satel = (fsat.variables['ice'][mm,:,:]) * dxcXdyc
-                cc_diff  = aa_model - bb_satel
-                diff_array[nnum,mm] = np.sqrt(cc_diff**2).sum()
+                    if param == 'area':
+
+                        aa_model = np.ma.filled(fm.variables['area'][mm,:,:], 0) * dxcXdyc
+                        bb_satel = (fsat.variables['ice'][mm,:,:]) * dxcXdyc
+                        cc_diff  = aa_model - bb_satel
+                        diff_array[nnum,mm] = np.sqrt(cc_diff**2).sum()
+                    
+                    if param == 'extent':
+
+                        dmodel = np.ma.filled(fm.variables['area'][mm,:,:], 0)
+                        dmodel[dmodel<0.15] = 0
+                        dmodel[dmodel>=0.15] = 1
+                        aa_model = dmodel * dxcXdyc
+
+                        dsat = fsat.variables['ice'][mm,:,:]
+                        dsat[dsat<0.15] = 0
+                        dsat[dsat>=0.15] = 1
+                        bb_satel = dsat * dxcXdyc
+                        cc_diff  = aa_model - bb_satel
+                        diff_array[nnum,mm] = np.sqrt(cc_diff**2).sum()
+
 
     
             fm.close()
             fsat.close()
 
     return diff_array
-
-def closest(latvar,lonvar,lat0,lon0):
-    '''
-    Find closest point in a set of (lat,lon) points to specified point
-    latvar - 2D latitude variable from an open netCDF dataset
-    lonvar - 2D longitude variable from an open netCDF dataset
-    lat0,lon0 - query point
-    Returns iy,ix such that the square of the tunnel distance
-    between (latval[it,ix],lonval[iy,ix]) and (lat0,lon0)
-    is minimum.
-
-    Taken from here http://www.unidata.ucar.edu/blogs/developer/en/entry/accessing_netcdf_data_by_coordinates
-    '''
-    rad_factor = pi/180.0 # for trignometry, need angles in radians
-    # Read latitude and longitude from file into numpy arrays
-    latvals = latvar[:] * rad_factor
-    lonvals = lonvar[:] * rad_factor
-    ny,nx = latvals.shape
-    lat0_rad = lat0 * rad_factor
-    lon0_rad = lon0 * rad_factor
-    # Compute numpy arrays for all values, no loops
-    clat,clon = np.cos(latvals),np.cos(lonvals)
-    slat,slon = np.sin(latvals),np.sin(lonvals)
-    delX = np.cos(lat0_rad)*np.cos(lon0_rad) - clat*clon
-    delY = np.cos(lat0_rad)*np.sin(lon0_rad) - clat*slon
-    delZ = np.sin(lat0_rad) - slat;
-    dist_sq = delX**2 + delY**2 + delZ**2
-    minindex_1d = dist_sq.argmin()  # 1D index of minimum element
-    iy_min,ix_min = np.unravel_index(minindex_1d, latvals.shape)
-    return iy_min,ix_min
