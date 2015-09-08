@@ -7,8 +7,11 @@ Contain mostly set of wrapper functions for map plotting with Basemap.
 Can be used with any 2D data, not necessarily MITgcm."""
 
 import numpy as np
-from mpl_toolkits.basemap import Basemap
-
+try:
+    from mpl_toolkits.basemap import Basemap
+except:
+    print('Basemap is not found, mitbase functions will not work')
+    
 def regbase(region):
     '''Takes name of the region and returns dictionary with
     information necessary for creation of the Basemap instance
