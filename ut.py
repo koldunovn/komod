@@ -17,6 +17,7 @@ Nikolay Koldunov 18 May 2010
 # -------------------------------------------------
 import os
 import matplotlib.pyplot as plt
+import matplotlib
 import numpy
 np = numpy
 try:
